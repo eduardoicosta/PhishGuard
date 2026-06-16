@@ -1,32 +1,32 @@
-# [cite_start]🛡️ PhishGuard - Detecção de Phishing com Ensemble Learning [cite: 90]
+# PhishGuard - Detecção de Phishing com Ensemble Learning
 
-[cite_start]Este repositório contém o Produto Mínimo Viável (MVP) do **PhishGuard**, uma solução de *Cybersecurity as a Service* (SECaaS) desenvolvida para o **Enterprise Challenge - CLARO**[cite: 97]. [cite_start]O sistema utiliza Inteligência Artificial avançada para proteger estações de trabalho desktop contra e-mails e links fraudulentos (phishing) em tempo real[cite: 206, 251].
+Este repositório contém o Produto Mínimo Viável (MVP) do **PhishGuard**, uma solução de *Cybersecurity as a Service* (SECaaS) desenvolvida para o **Enterprise Challenge - CLARO**. O sistema utiliza Inteligência Artificial avançada para proteger estações de trabalho desktop contra e-mails e links fraudulentos (phishing) em tempo real.
 
 ---
 
-## [cite_start]👥 Integrantes (Startup One) [cite: 89]
-* [cite_start]**Arthur Dias da Silva Biancchi** – RM 99162 [cite: 88]
-* [cite_start]**Eduardo Costa Nascimento dos Anjos** – RM 552519 [cite: 88]
-* [cite_start]**Enzo Puerta Meschini** – RM 550807 [cite: 88]
+## Integrantes (Startup One)
+* **Arthur Dias da Silva Biancchi** – RM 99162
+* **Eduardo Costa Nascimento dos Anjos** – RM 552519
+* **Enzo Puerta Meschini** – RM 550807
 
-[cite_start]**Curso:** Sistemas de Informação - FIAP (2026) [cite: 86, 87, 93]
+**Curso:** Sistemas de Informação - FIAP (2026)
 
 ---
 
 ## 🚀 Funcionalidades Principais
-1. [cite_start]**Detecção Inteligente via Ensemble Learning:** Combinação híbrida dos algoritmos matemáticos **XGBoost** e **Random Forest** para classificar e prever e-mails maliciosos antes da interação do usuário[cite: 106, 205, 206].
-2. [cite_start]**Caixa de Entrada Blindada:** Triagem visual com alertas cromáticos dinâmicos baseados no nível de risco gerado pela IA (Banners Verdes para e-mails seguros e Vermelhos para ameaças)[cite: 102, 104].
-3. [cite_start]**Hub de Convergência Conversacional:** Interface integrada In-App e suporte planejado para validação ágil de URLs externas através da API do WhatsApp Business[cite: 112, 113, 220].
-4. [cite_start]**Painel do SOC (Security Operations Center):** Governança ágil para controle do *Threshold* (sensibilidade) da IA e gerenciamento de *Whitelists* (domínios confiáveis)[cite: 103].
+1. **Detecção Inteligente via Ensemble Learning:** Combinação híbrida dos algoritmos matemáticos **XGBoost** e **Random Forest** para classificar e prever e-mails maliciosos antes da interação do usuário.
+2. **Caixa de Entrada Blindada:** Triagem visual com alertas cromáticos dinâmicos baseados no nível de risco gerado pela IA (Banners Verdes para e-mails seguros e Vermelhos para ameaças).
+3. **Hub de Convergência Conversacional:** Interface integrada In-App e suporte planejado para validação ágil de URLs externas através da API do WhatsApp Business.
+4. **Painel do SOC (Security Operations Center):** Governança ágil para controle do *Threshold* (sensibilidade) da IA e gerenciamento de *Whitelists* (domínios confiáveis).
 
 ---
 
 ## 🛠️ Stack Tecnológica
-* [cite_start]**Linguagem Core:** Python [cite: 208]
-* [cite_start]**Inteligência Artificial:** Scikit-Learn, XGBoost, Pandas e NumPy [cite: 209, 210, 211, 212]
-* [cite_start]**Barramento e APIs:** FastAPI [cite: 217]
-* [cite_start]**Banco de Dados & Cloud:** PostgreSQL, Google Cloud SQL e Google Cloud Platform (GCP) [cite: 108, 218, 229]
-* [cite_start]**Integrações de IA e Mensageria:** OpenAI API e WhatsApp Business API [cite: 222, 223]
+* **Linguagem Core:** Python
+* **Inteligência Artificial:** Scikit-Learn, XGBoost, Pandas e NumPy
+* **Barramento e APIs:** FastAPI
+* **Banco de Dados & Cloud:** PostgreSQL, Google Cloud SQL e Google Cloud Platform (GCP)
+* **Integrações de IA e Mensageria:** OpenAI API e WhatsApp Business API
 
 ---
 
