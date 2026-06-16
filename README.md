@@ -13,7 +13,7 @@ Este repositório contém o Produto Mínimo Viável (MVP) do **PhishGuard**, uma
 
 ---
 
-## 🚀 Funcionalidades Principais
+## Funcionalidades Principais
 1. **Detecção Inteligente via Ensemble Learning:** Combinação híbrida dos algoritmos matemáticos **XGBoost** e **Random Forest** para classificar e prever e-mails maliciosos antes da interação do usuário.
 2. **Caixa de Entrada Blindada:** Triagem visual com alertas cromáticos dinâmicos baseados no nível de risco gerado pela IA (Banners Verdes para e-mails seguros e Vermelhos para ameaças).
 3. **Hub de Convergência Conversacional:** Interface integrada In-App e suporte planejado para validação ágil de URLs externas através da API do WhatsApp Business.
@@ -21,7 +21,7 @@ Este repositório contém o Produto Mínimo Viável (MVP) do **PhishGuard**, uma
 
 ---
 
-## 🛠️ Stack Tecnológica
+## Stack Tecnológica
 * **Linguagem Core:** Python
 * **Inteligência Artificial:** Scikit-Learn, XGBoost, Pandas e NumPy
 * **Barramento e APIs:** FastAPI
@@ -30,7 +30,7 @@ Este repositório contém o Produto Mínimo Viável (MVP) do **PhishGuard**, uma
 
 ---
 
-## 📁 Estrutura de Diretórios
+## Estrutura de Diretórios
 ```text
 PhishGuard/
 ├── assets/               # Identidade visual e logotipos do projeto
@@ -51,7 +51,7 @@ PhishGuard/
 
 ---
 
-## ⚙️ Configuração e Instalação Local
+## Configuração e Instalação Local
 
 Como as pastas de ambientes virtuais (`venv/`), dados (`data/`) e modelos (`models/`) estão protegidas no `.gitignore`, siga as instruções abaixo para reconstruir o ambiente localmente:
 
@@ -89,7 +89,7 @@ OPENAI_API_KEY=sua_chave_da_openai
 
 ---
 
-## 🔍 Executando o Script de Diagnóstico IMAP
+## Executando o Script de Diagnóstico IMAP
 
 O projeto acompanha um script utilitário (`diagnostico.py`) focado na checagem de integridade e varredura de requisições iniciais da caixa de entrada via protocolo IMAP seguro.
 
