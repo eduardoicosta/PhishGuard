@@ -1,78 +1,123 @@
-import pandas as pd
-import joblib
 import os
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.ensemble import RandomForestClassifier
-from xgboost import XGBClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
 
-# Configuração de caminhos dinâmicos
+import joblib
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.model_selection import train_test_split
+from xgboost import XGBClassifier
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_PATH = os.path.join(BASE_DIR, 'data', 'phishing_email.csv')
-MODEL_DIR = os.path.join(BASE_DIR, 'models')
+DATA_PATH = os.path.join(BASE_DIR, "data", "phishing_ptbr.csv")
+MODEL_DIR = os.path.join(BASE_DIR, "models")
+
+
+def _carregar_dataset(caminho: str) -> pd.DataFrame:
+    if not os.path.exists(caminho):
+        raise FileNotFoundError(
+            f"Dataset não encontrado em {caminho}. "
+            "Execute: python scripts/gerar_dataset_ptbr.py"
+        )
+
+    df = pd.read_csv(caminho)
+
+    if "texto" not in df.columns or "label" not in df.columns:
+        raise ValueError("O CSV deve conter as colunas 'texto' e 'label'.")
+
+    df["label"] = pd.to_numeric(df["label"], errors="coerce")
+    df = df.dropna(subset=["texto", "label"])
+    df["texto"] = df["texto"].astype(str).str.strip()
+    df = df[df["texto"].str.len() > 0]
+    df["label"] = df["label"].astype(int)
+
+    if not set(df["label"].unique()).issubset({0, 1}):
+        raise ValueError("Os labels devem ser 0 (seguro) ou 1 (phishing).")
+
+    return df
+
+
+def _criar_vetorizador() -> TfidfVectorizer:
+    """Parâmetros ajustados para base pequena em português (~150-200 exemplos)."""
+    return TfidfVectorizer(
+        lowercase=True,
+        strip_accents="unicode",
+        analyzer="word",
+        ngram_range=(1, 2),
+        min_df=1,
+        max_df=0.95,
+        max_features=5000,
+        sublinear_tf=True,
+        token_pattern=r"(?u)\b[\wáàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ]+\b",
+    )
+
 
 def treinar_e_salvar_modelos():
-    print("Iniciando o treinamento do PhishGuard com dados reais...")
-    
-    # 1. Carregando os 104MB de e-mails reais
+    print("Iniciando treinamento do PhishGuard (dataset PT-BR)...")
+
     try:
-        df = pd.read_csv(DATA_PATH)
-    except FileNotFoundError:
-        print(f"Erro: Arquivo não encontrado em {DATA_PATH}")
+        df = _carregar_dataset(DATA_PATH)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"Erro: {exc}")
         return
 
-    # Imprime os nomes originais só para descobrirmos onde estava o erro
-    print(f"Colunas originais detectadas pelo Pandas: {df.columns.tolist()}")
+    total_seguros = (df["label"] == 0).sum()
+    total_phishing = (df["label"] == 1).sum()
+    print(f"Total de e-mails: {len(df)} ({total_seguros} seguros, {total_phishing} phishing)")
 
-    # TÁTICA À PROVA DE FALHAS: 
-    # Se o CSV tiver mais de 2 colunas (ex: um ID no começo), pegamos só as duas últimas.
-    if len(df.columns) > 2:
-        df = df.iloc[:, -2:] 
-        
-    # Renomeamos as colunas forçadamente para nomes fáceis
-    df.columns = ['texto', 'label']
+    vetorizador = _criar_vetorizador()
+    X = vetorizador.fit_transform(df["texto"])
+    y = df["label"]
 
-    # Garante que a coluna 'label' seja numérica (se houver lixo, vira 'NaN')
-    df['label'] = pd.to_numeric(df['label'], errors='coerce')
+    X_treino, X_teste, y_treino, y_teste = train_test_split(
+        X,
+        y,
+        test_size=0.2,
+        random_state=42,
+        stratify=y,
+    )
 
-    # Limpeza: remove qualquer linha que ficou sem texto ou sem label numérico
-    df = df.dropna(subset=['texto', 'label'])
-    
-    # Força os labels a serem números inteiros (0 ou 1) para o XGBoost não reclamar
-    df['label'] = df['label'].astype(int)
-
-    print(f"Total de e-mails validados para treino: {len(df)}")
-
-    # 2. Convertendo os textos
-    print("Vetorizando os textos (Isso pode levar alguns segundos/minutos)...")
-    vetorizador = TfidfVectorizer()
-    X = vetorizador.fit_transform(df['texto'])
-    y = df['label']
-
-    X_treino, X_teste, y_treino, y_teste = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # 3. Treinando Random Forest
-    print("Treinando modelo Random Forest...")
-    rf_model = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+    print("Treinando Random Forest...")
+    rf_model = RandomForestClassifier(
+        n_estimators=80,
+        max_depth=12,
+        min_samples_split=4,
+        min_samples_leaf=2,
+        class_weight="balanced",
+        random_state=42,
+        n_jobs=-1,
+    )
     rf_model.fit(X_treino, y_treino)
     rf_pred = rf_model.predict(X_teste)
-    print(f"✅ Acurácia Random Forest: {accuracy_score(y_teste, rf_pred):.4f}")
+    print(f"Acurácia Random Forest: {accuracy_score(y_teste, rf_pred):.4f}")
 
-    # 4. Treinando XGBoost
-    print("Treinando modelo XGBoost...")
-    xgb_model = XGBClassifier(eval_metric='logloss', random_state=42, n_jobs=-1)
+    print("Treinando XGBoost...")
+    xgb_model = XGBClassifier(
+        n_estimators=80,
+        max_depth=4,
+        learning_rate=0.1,
+        subsample=0.85,
+        colsample_bytree=0.85,
+        reg_alpha=0.1,
+        reg_lambda=1.0,
+        eval_metric="logloss",
+        random_state=42,
+        n_jobs=-1,
+    )
     xgb_model.fit(X_treino, y_treino)
     xgb_pred = xgb_model.predict(X_teste)
-    print(f"✅ Acurácia XGBoost: {accuracy_score(y_teste, xgb_pred):.4f}")
+    print(f"Acurácia XGBoost: {accuracy_score(y_teste, xgb_pred):.4f}")
 
-    # 5. Salvando os modelos
+    print("\nRelatório Random Forest:")
+    print(classification_report(y_teste, rf_pred, target_names=["Seguro", "Phishing"]))
+
     os.makedirs(MODEL_DIR, exist_ok=True)
-    joblib.dump(vetorizador, os.path.join(MODEL_DIR, 'vetorizador.pkl'))
-    joblib.dump(rf_model, os.path.join(MODEL_DIR, 'random_forest.pkl'))
-    joblib.dump(xgb_model, os.path.join(MODEL_DIR, 'xgboost.pkl'))
-    
-    print("Modelos treinados e exportados para a pasta 'models' com sucesso!")
+    joblib.dump(vetorizador, os.path.join(MODEL_DIR, "vetorizador.pkl"))
+    joblib.dump(rf_model, os.path.join(MODEL_DIR, "random_forest.pkl"))
+    joblib.dump(xgb_model, os.path.join(MODEL_DIR, "xgboost.pkl"))
+
+    print(f"\nModelos salvos em '{MODEL_DIR}' com sucesso!")
+
 
 if __name__ == "__main__":
     treinar_e_salvar_modelos()

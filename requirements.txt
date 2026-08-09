@@ -3,3 +3,6 @@ scikit-learn
 xgboost
 python-dotenv
 joblib
+fastapi
+uvicorn
+google-genai
