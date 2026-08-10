@@ -36,7 +36,7 @@
 
 ---
 
-## 🎯 1. Sobre o Projeto (O Pivô Estratégico)
+## 🎯 1. Sobre o Projeto
 
 O **PhishGuard** passou por um completo e maduro **pivô estratégico de arquitetura**. O que nasceu inicialmente como uma ferramenta desktop monolítica local de triagem de e-mails evoluiu para um ecossistema integrado de **SECaaS (Security as a Service) B2B**. 
 
