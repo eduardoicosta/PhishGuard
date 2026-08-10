@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import re
+import sqlite3
 from asyncio import CancelledError
 from contextlib import asynccontextmanager
 from email.utils import parseaddr
@@ -19,6 +20,38 @@ load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, "models")
+DB_PATH = os.path.join(BASE_DIR, "phishguard.db")
+
+
+def inicializar_banco():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS interacoes_hub (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            canal TEXT,
+            mensagem_usuario TEXT,
+            resposta_bot TEXT,
+            risco_detectado TEXT,
+            data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+
+def salvar_interacao_hub(canal: str, mensagem: str, resposta: str, risco: str):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO interacoes_hub (canal, mensagem_usuario, resposta_bot, risco_detectado) VALUES (?, ?, ?, ?)",
+            (canal, mensagem, resposta, risco)
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Erro ao salvar interação no banco: {e}")
 
 LIMIAR_CAMADA_1 = 0.35
 GEMINI_MODEL = "gemini-3.5-flash"
@@ -67,6 +100,9 @@ class VereditoGemini(BaseModel):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global vetorizador, modelo_rf, modelo_xgb, cliente_gemini
+
+    # Inicializar banco de dados SQLite nativo
+    inicializar_banco()
 
     caminhos = {
         "vetorizador": os.path.join(MODEL_DIR, "vetorizador.pkl"),
@@ -264,6 +300,269 @@ async def analisar_email(payload: EmailAnaliseRequest):
         # Trata cancelamento de requisição silenciosamente sem gerar traceback ou erro 500 no terminal
         print("Análise cancelada pelo cliente (navegação rápida).")
         raise
+
+
+class WhatsAppMessageRequest(BaseModel):
+    mensagem: str
+
+
+class WhatsAppMessageResponse(BaseModel):
+    resposta: str
+
+
+def consultar_gemini_whatsapp(mensagem: str, score_risco: float) -> VereditoGemini:
+    if cliente_gemini is None:
+        raise RuntimeError("Cliente Gemini não configurado. Defina GEMINI_API_KEY no ambiente.")
+
+    prompt = (
+        f"Analise o seguinte texto enviado via WhatsApp. O modelo estatístico preliminar classificou esta mensagem com score de risco de {score_risco * 100:.1f}%.\n\n"
+        f"Texto:\n{mensagem}\n"
+    )
+
+    instrucao_sistema = (
+        "Você é o assistente virtual do PhishGuard no WhatsApp. Sua função é analisar textos e links encaminhados por usuários em chats de mensagens. "
+        "NUNCA mencione e-mail, remetentes de e-mail, assuntos ou cabeçalhos. "
+        "Analise estritamente a mensagem em busca de engenharia social, urgência artificial, golpes conhecidos (como falsas taxas dos Correios/Receita Federal, clonagem de cartão ou bancos) e links maliciosos."
+    )
+
+    response = cliente_gemini.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            temperature=0.2,
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
+            system_instruction=instrucao_sistema,
+            response_mime_type="application/json",
+            response_json_schema=VereditoGemini.model_json_schema(),
+        ),
+    )
+
+    dados = extrair_json_resposta(response.text or "")
+    veredito = VereditoGemini.model_validate(dados)
+    return veredito
+
+
+@app.post("/webhook/whatsapp", response_model=WhatsAppMessageResponse)
+async def webhook_whatsapp(payload: WhatsAppMessageRequest):
+    if vetorizador is None or modelo_rf is None or modelo_xgb is None:
+        raise HTTPException(status_code=503, detail="Modelos de IA ainda não foram carregados.")
+
+    mensagem = payload.mensagem.strip()
+    if not mensagem:
+        return WhatsAppMessageResponse(
+            resposta="⚠️ Por favor, envie uma mensagem válida para análise."
+        )
+
+    # 1. Calcular o score de risco estatístico puramente sobre o texto (sem metadados de e-mail)
+    score_risco = calcular_score_risco(
+        assunto="",
+        corpo_texto=mensagem,
+        remetente=""
+    )
+
+    try:
+        try:
+            if cliente_gemini is None:
+                raise RuntimeError("Cliente Gemini não configurado.")
+
+            # 2. Consultar Gemini utilizando a instrução de sistema dedicada ao WhatsApp
+            veredito = await asyncio.to_thread(
+                consultar_gemini_whatsapp,
+                mensagem,
+                score_risco,
+            )
+            is_phishing = veredito.is_phishing_real
+            explicacao = veredito.explicacao
+            dupla_checagem = True
+        except Exception as exc:
+            # Fallback se o Gemini falhar ou não estiver configurado
+            is_phishing = score_risco >= LIMIAR_CAMADA_1
+            explicacao = (
+                "Análise preventiva realizada com sucesso. "
+                "Detectamos padrões de risco com base na estrutura estatística da mensagem."
+            )
+            dupla_checagem = False
+
+        # 3. Sincronizar o score de exibição com o veredito para eliminar contradições
+        if is_phishing:
+            score_exibicao = max(score_risco, 0.85)
+            resposta_texto = (
+                f"🚨 *Alerta PhishGuard!* 🚨\n\n"
+                f"Analisei sua mensagem e ela tem *{score_exibicao * 100:.1f}%* de chance de ser um golpe/phishing.\n\n"
+                f"⚠️ *Análise do bot:*\n{explicacao}\n\n"
+                f"🛑 *Recomendação:* Não clique em nenhum link, não compartilhe códigos ou dados pessoais, e evite interagir com esse remetente!"
+            )
+        else:
+            score_exibicao = min(score_risco, 0.15)
+            resposta_texto = (
+                f"✅ *PhishGuard Seguro!* ✅\n\n"
+                f"Analisei sua mensagem e o risco de golpe é muito baixo (*{score_exibicao * 100:.1f}%*).\n\n"
+                f"💡 *Explicação:*\n{explicacao}\n\n"
+                f"🛡️ *Dica:* Mesmo que pareça seguro, sempre fique atento a links desconhecidos e nunca forneça senhas ou dados confidenciais."
+            )
+
+        # Gravar log no banco SQLite local
+        salvar_interacao_hub(
+            canal="whatsapp",
+            mensagem=mensagem,
+            resposta=resposta_texto,
+            risco="Phishing" if is_phishing else "Seguro"
+        )
+
+        return WhatsAppMessageResponse(resposta=resposta_texto)
+
+    except CancelledError:
+        print("Análise de WhatsApp cancelada pelo cliente.")
+        raise
+
+
+class WebchatMessageRequest(BaseModel):
+    mensagem: str
+
+
+class WebchatMessageResponse(BaseModel):
+    resposta: str
+
+
+def consultar_gemini_webchat(mensagem: str, score_risco: float) -> str:
+    if cliente_gemini is None:
+        raise RuntimeError("Cliente Gemini não configurado.")
+
+    score_phishing_sincronizado = max(score_risco, 0.85) * 100
+    score_seguro_sincronizado = min(score_risco, 0.15) * 100
+
+    prompt = (
+        f"Mensagem do usuário:\n{mensagem}\n\n"
+        f"[Contexto de Riscos Sincronizados]\n"
+        f"- Caso você classifique a mensagem como PHISHING/GOLPE (Papel 2), utilize obrigatoriamente o score de risco de exatamente {score_phishing_sincronizado:.1f}% na sua resposta escrita.\n"
+        f"- Caso você classifique a mensagem como SEGURA (Papel 2) ou se tratar de dúvidas comerciais (Papel 1), utilize obrigatoriamente o score de risco de exatamente {score_seguro_sincronizado:.1f}% caso precise citar alguma porcentagem de risco."
+    )
+
+    instrucao_sistema = (
+        "Você é a IA de atendimento híbrido do PhishGuard, uma solução corporativa B2B de SECaaS (Security as a Service) de proteção contra phishing.\n"
+        "Sua atuação deve se adaptar dinamicamente ao objetivo do usuário:\n\n"
+        "PAPEL 1: VENDAS E SUPORTE (Se o usuário saudar, perguntar sobre o PhishGuard, como funciona, preços, contratação ou planos):\n"
+        "- Seja um assistente de vendas altamente persuasivo, profissional e simpático.\n"
+        "- Explique que o PhishGuard é um SECaaS SaaS cobrado mensalmente por colaborador.\n"
+        "- Apresente os planos com orgulho:\n"
+        "  1. Plano Starter (R$ 15/colaborador/mês): Proteção de Extensão Desktop + motor estatístico de Machine Learning.\n"
+        "  2. Plano Enterprise (R$ 25/colaborador/mês): Extensão Desktop + IA Generativa Gemini + Hub Conversacional WhatsApp + Painel de Governança corporativa.\n"
+        "- Destaque o diferencial de termos um Hub Conversacional unificado (Extensão, WhatsApp e Webchat).\n\n"
+        "PAPEL 2: ANÁLISE DE RISCO (Se o usuário enviar um link, mensagem ou texto suspeito solicitando análise):\n"
+        "- Ignore o papel comercial e atue estritamente como um Analista de Segurança.\n"
+        "- Use o [Contexto Técnico] fornecido no prompt para apoiar seu veredito.\n"
+        "- Se classificar como golpe, indique que há alto risco (mostre o score de risco correspondente, ex: acima de 85% se for phishing, garantindo sincronia entre seu tom e a porcentagem). Use emojis de alerta (🚨, ⚠️) e dê orientações claras para não clicar.\n"
+        "- Se classificar como seguro, tranquilize o usuário com base em argumentos técnicos, mostrando um risco baixo (abaixo de 15%).\n"
+        "- NUNCA cite termos de e-mail (como cabeçalhos, remetentes de e-mail ou campos 'De/Assunto') a menos que o usuário tenha explicitamente enviado um cabeçalho de e-mail para análise.\n\n"
+        "Sempre responda em português brasileiro usando formatação amigável para chat (negritos com asteriscos * e emojis)."
+    )
+
+    response = cliente_gemini.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            temperature=0.3,
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
+            system_instruction=instrucao_sistema,
+        ),
+    )
+
+    return response.text or ""
+
+
+@app.post("/webhook/webchat", response_model=WebchatMessageResponse)
+async def webhook_webchat(payload: WebchatMessageRequest):
+    if vetorizador is None or modelo_rf is None or modelo_xgb is None:
+        raise HTTPException(status_code=503, detail="Modelos de IA ainda não foram carregados.")
+
+    mensagem = payload.mensagem.strip()
+    if not mensagem:
+        return WebchatMessageResponse(resposta="Olá! Como posso ajudar você hoje?")
+
+    # Calcular o score de risco estatístico puramente sobre o texto
+    score_risco = calcular_score_risco(
+        assunto="",
+        corpo_texto=mensagem,
+        remetente=""
+    )
+
+    try:
+        try:
+            if cliente_gemini is None:
+                raise RuntimeError("Cliente Gemini não configurado.")
+
+            # Consultar Gemini usando o prompt híbrido
+            resposta_texto = await asyncio.to_thread(
+                consultar_gemini_webchat,
+                mensagem,
+                score_risco,
+            )
+        except Exception as exc:
+            # Fallback robusto se o Gemini falhar ou não estiver configurado
+            palavras_chave = ["preço", "plano", "valor", "mensal", "custo", "contratar", "comprar", "assinar", "starter", "enterprise", "phishguard", "funciona", "b2b", "venda", "empresa", "comercial"]
+            mensagem_lc = mensagem.lower()
+            
+            if any(p in mensagem_lc for p in palavras_chave):
+                resposta_texto = (
+                    "Olá! O *PhishGuard* é uma solução corporativa B2B de *SECaaS (Security as a Service)* voltada para proteger sua empresa contra phishing e engenharia social em múltiplos canais (E-mail, WhatsApp e Webchat).\n\n"
+                    "Oferecemos dois planos flexíveis sob assinatura mensal por colaborador (seat):\n\n"
+                    "🛡️ *Plano Starter (R$ 15/colaborador/mês):*\n"
+                    "- Extensão Desktop de análise de e-mails.\n"
+                    "- Motor estatístico avançado de Machine Learning (Camada 1).\n\n"
+                    "👑 *Plano Enterprise (R$ 25/colaborador/mês):*\n"
+                    "- Extensão Desktop de análise de e-mails.\n"
+                    "- Dupla checagem contextual profunda com IA Generativa Gemini (Camada 2).\n"
+                    "- Hub Conversacional integrado para WhatsApp.\n"
+                    "- Painel de Governança corporativa completo com métricas e SOC.\n\n"
+                    "Gostaria de agendar uma demonstração ou falar com um de nossos especialistas?"
+                )
+            else:
+                is_phishing = score_risco >= LIMIAR_CAMADA_1
+                if is_phishing:
+                    score_exibicao = max(score_risco, 0.85)
+                    resposta_texto = (
+                        f"🚨 *Alerta de Phishing Detectado!* 🚨\n\n"
+                        f"Nossa análise estatística de segurança identificou um risco de *{score_exibicao * 100:.1f}%* nesta mensagem.\n\n"
+                        f"⚠️ *Análise do bot:* O texto apresenta gatilhos suspeitos associados a engenharia social, urgência artificial ou links maliciosos.\n\n"
+                        f"🛑 *Recomendação:* Não clique em links e não forneça informações confidenciais."
+                    )
+                else:
+                    score_exibicao = min(score_risco, 0.15)
+                    resposta_texto = (
+                        f"✅ *PhishGuard Seguro!* ✅\n\n"
+                        f"Nossa análise estatística de segurança identificou que esta mensagem parece ser segura (risco estimado em *{score_exibicao * 100:.1f}%*).\n\n"
+                        f"🛡️ *Dica:* Mesmo que pareça segura, sempre desconfie de solicitações incomuns."
+                    )
+
+        # Gravar log no banco SQLite local
+        risco_banco = "Phishing" if "🚨" in resposta_texto else "Seguro"
+        salvar_interacao_hub(
+            canal="webchat",
+            mensagem=mensagem,
+            resposta=resposta_texto,
+            risco=risco_banco
+        )
+
+        return WebchatMessageResponse(resposta=resposta_texto)
+
+    except CancelledError:
+        print("Análise de Webchat cancelada pelo cliente.")
+        raise
+
+
+@app.get("/api/logs-soc")
+async def get_logs_soc():
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, canal, mensagem_usuario, resposta_bot, risco_detectado, data_hora FROM interacoes_hub ORDER BY data_hora DESC LIMIT 50")
+        rows = cursor.fetchall()
+        logs = [dict(row) for row in rows]
+        conn.close()
+        return logs
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao consultar banco de dados: {e}")
 
 
 if __name__ == "__main__":

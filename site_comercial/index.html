@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishGuard - Inteligência contra Phishing B2B</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Base and variables */
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.6; }
+        a { color: inherit; text-decoration: none; }
+        
+        /* Navbar */
+        header { background-color: rgba(15, 23, 42, 0.95); position: fixed; top: 0; width: 100%; border-bottom: 1px solid var(--border); z-index: 100; backdrop-filter: blur(8px); }
+        .nav-container { max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; color: var(--primary); }
+        .logo img { height: 35px; border-radius: 4px; }
+        .nav-links { display: flex; gap: 30px; list-style: none; font-weight: 500; }
+        .nav-links li a:hover { color: var(--primary); transition: color 0.2s; }
+        
+        /* Hero Section */
+        .hero { padding: 160px 20px 100px; text-align: center; max-width: 900px; margin: 0 auto; }
+        .hero h1 { font-size: 48px; font-weight: 800; line-height: 1.2; margin-bottom: 20px; background: linear-gradient(to right, #ffffff, #10b981); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 18px; color: var(--text-muted); margin-bottom: 40px; }
+        .btn { display: inline-flex; align-items: center; gap: 10px; background-color: var(--primary); color: #0f172a; padding: 12px 28px; border-radius: 6px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.2s; border: none; }
+        .btn:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+        .btn-outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-main); margin-left: 15px; }
+        .btn-outline:hover { background-color: rgba(255, 255, 255, 0.05); }
+        section { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
+        .section-title { text-align: center; margin-bottom: 50px; }
+        .section-title h2 { font-size: 32px; font-weight: 700; margin-bottom: 15px; }
+        .section-title p { color: var(--text-muted); font-size: 16px; }
+        .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .card { background-color: var(--bg-card); border: 1px solid var(--border); padding: 40px 30px; border-radius: 12px; transition: transform 0.2s, border-color 0.2s; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .card-icon { font-size: 36px; color: var(--primary); margin-bottom: 20px; }
+        .card h3 { font-size: 20px; margin-bottom: 12px; }
+        .card p { color: var(--text-muted); font-size: 14.5px; }
+        .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 900px; margin: 0 auto; }
+        .plan-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 40px 30px; display: flex; flex-direction: column; position: relative; }
+        .plan-card.enterprise { border-color: var(--primary); }
+        .plan-tag { position: absolute; top: 15px; right: 15px; background-color: var(--primary); color: #0f172a; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+        .plan-name { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+        .plan-price { font-size: 36px; font-weight: 800; margin-bottom: 5px; display: flex; align-items: baseline; }
+        .plan-price span { font-size: 14px; color: var(--text-muted); font-weight: 400; }
+        .plan-features { list-style: none; margin: 30px 0; display: flex; flex-direction: column; gap: 15px; flex: 1; }
+        .plan-features li { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+        .plan-features i { color: var(--primary); }
+        .chat-widget { position: fixed; bottom: 30px; right: 30px; z-index: 1000; }
+        .chat-trigger { width: 60px; height: 60px; background-color: var(--primary); color: #0f172a; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); border: none; transition: transform 0.2s; }
+        .chat-trigger:hover { transform: scale(1.08); }
+        .chat-container { width: 380px; height: 500px; background-color: #1e293b; border: 1px solid var(--border); border-radius: 12px; display: none; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: absolute; bottom: 80px; right: 0; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-header { background-color: #0f172a; border-bottom: 1px solid var(--border); padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .chat-bot-info { display: flex; align-items: center; gap: 10px; }
+        .chat-bot-avatar { width: 32px; height: 32px; background-color: var(--primary); color: #0f172a; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; }
+        .chat-bot-info h4 { font-size: 14px; font-weight: 600; }
+        .chat-bot-info span { font-size: 11px; color: var(--primary); display: block; }
+        .chat-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; }
+        .chat-close:hover { color: white; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background-color: #0f172a; }
+        .chat-row { display: flex; width: 100%; }
+        .chat-row.user { justify-content: flex-end; }
+        .chat-row.bot { justify-content: flex-start; }
+        .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 8px; font-size: 13.5px; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap; }
+        .chat-bubble.user { background-color: var(--primary); color: #0f172a; border-top-right-radius: 0; font-weight: 500; }
+        .chat-bubble.bot { background-color: #1e293b; color: var(--text-main); border-top-left-radius: 0; }
+        .chat-bubble strong { font-weight: bold; }
+        .chat-bubble.error { background-color: #3f1d24; color: #f87171; border: 1px solid #7f1d1d; }
+        .typing-indicator { display: flex; gap: 4px; padding: 4px 8px; align-items: center; }
+        .typing-indicator span { width: 6px; height: 6px; background-color: var(--text-muted); border-radius: 50%; display: inline-block; animation: bounce 1.3s infinite ease-in-out; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+        .chat-footer { padding: 12px; background-color: #1e293b; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+        .chat-input { flex: 1; border: 1px solid var(--border); background-color: #0f172a; padding: 8px 12px; border-radius: 6px; outline: none; font-size: 13.5px; color: var(--text-main); }
+        .chat-input:focus { border-color: var(--primary); }
+        .chat-send-btn { background-color: var(--primary); border: none; color: #0f172a; width: 35px; height: 35px; border-radius: 6px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 14px; transition: background-color 0.2s; }
+        .chat-send-btn:hover { background-color: var(--primary-hover); }
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero h1 { font-size: 32px; }
+            .hero p { font-size: 15px; }
+            .chat-container { width: 320px; height: 420px; right: -10px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header/Navbar -->
+    <header>
+        <div class="nav-container">
+            <div class="logo">
+                <img src="../assets/logo.png" alt="PhishGuard" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3551/3551571.png'">
+                <span>PhishGuard</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#produto">Produto</a></li>
+                <li><a href="#planos">Planos</a></li>
+                <li><a href="#contato" onclick="toggleChat(); return false;">Atendimento</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="produto">
+        <h1>Segurança Invisível. Proteção Invencível.</h1>
+        <p>A primeira linha de defesa inteligente do mercado B2B. Protegemos os colaboradores da sua empresa contra phishing e engenharia social em tempo real, integrando extensão corporativa, bot de WhatsApp e SOC conversacional em um único ecossistema unificado.</p>
+        <button class="btn" onclick="toggleChat()"><i class="fa-solid fa-comments"></i> Falar com Especialista</button>
+        <button class="btn btn-outline" onclick="document.getElementById('planos').scrollIntoView({behavior: 'smooth'})">Ver Planos B2B</button>
+    </section>
+
+    <!-- Hub Conversacional Channel Section -->
+    <section>
+        <div class="section-title">
+            <h2>O Hub Conversacional</h2>
+            <p>Três canais integrados de forma transparente para mitigar golpes corporativos de Dia-Zero.</p>
+        </div>
+        <div class="hub-grid">
+            <div class="card">
+                <div class="card-icon"><i class="fa-solid fa-desktop"></i></div>
+                <h3>1. Extensão Desktop</h3>
+                <p>Análise passiva e contínua direto na caixa de entrada do e-mail corporativo (Outlook, Gmail e OWA), identificando ameaças antes que o usuário clique.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon"><i class="fa-brands fa-whatsapp"></i></div>
+                <h3>2. Bot de WhatsApp</h3>
+                <p>Análise ativa sob demanda direto no celular do colaborador. Ele encaminha links ou textos e a nossa inteligência responde em formato amigável no chat.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon"><i class="fa-solid fa-headset"></i></div>
+                <h3>3. Webchat SOC</h3>
+                <p>Análise interativa e suporte comercial integrado diretamente no site. Um assistente virtual híbrido que protege e treina sua equipe continuamente.</p>
+            </div>
+        </div>
+    </section>
+    <!-- Plans Section -->
+    <section id="planos">
+        <div class="section-title">
+            <h2>Nossos Planos Corporativos (SaaS)</h2>
+            <p>Escolha o nível ideal de proteção e inteligência conversacional para sua empresa.</p>
+        </div>
+        <div class="plans-grid">
+            <div class="plan-card">
+                <div class="plan-name">Plano Starter</div>
+                <div class="plan-price">R$ 15 <span>/ colaborador / mês</span></div>
+                <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 10px;">Ideal para pequenas equipes que buscam proteção essencial de e-mails.</p>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-circle-check"></i> Extensão Desktop para E-mails</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Motor de ML Estatístico</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Análise Passiva da Caixa de Entrada</li>
+                    <li style="color: var(--text-muted); text-decoration: line-through;"><i class="fa-solid fa-circle-xmark" style="color: var(--text-muted);"></i> IA Generativa Gemini</li>
+                    <li style="color: var(--text-muted); text-decoration: line-through;"><i class="fa-solid fa-circle-xmark" style="color: var(--text-muted);"></i> Integração WhatsApp Bot</li>
+                </ul>
+                <button class="btn btn-outline" style="margin: 0; width: 100%;" onclick="toggleChat('Quero assinar o Plano Starter')">Contratar Starter</button>
+            </div>
+            <div class="plan-card enterprise">
+                <div class="plan-tag">RECOMENDADO</div>
+                <div class="plan-name">Plano Enterprise</div>
+                <div class="plan-price">R$ 25 <span>/ colaborador / mês</span></div>
+                <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 10px;">Proteção corporativa completa com IA Generativa, governança e Hub multi-canal.</p>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-circle-check"></i> Extensão Desktop para E-mails</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Motor de ML Estatístico</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Dupla Checagem com IA Gemini</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Hub de WhatsApp Ativo 24/7</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Painel SOC de Governança B2B</li>
+                </ul>
+                <button class="btn" style="margin: 0; width: 100%;" onclick="toggleChat('Quero saber mais sobre o Plano Enterprise')">Contratar Enterprise</button>
+            </div>
+        </div>
+    </section>
+    <!-- Floating Webchat Widget -->
+    <div class="chat-widget">
+        <button class="chat-trigger" onclick="toggleChat()"><i class="fa-solid fa-comments"></i></button>
+        <div class="chat-container" id="chatContainer">
+            <div class="chat-header">
+                <div class="chat-bot-info">
+                    <div class="chat-bot-avatar"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div>
+                        <h4>PhishGuard IA</h4>
+                        <span>Online • Especialista</span>
+                    </div>
+                </div>
+                <button class="chat-close" onclick="toggleChat()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="chat-body" id="chatBody">
+                <div class="chat-row bot">
+                    <div class="chat-bubble bot">Olá! Sou a IA de Atendimento do 🛡️ <strong>PhishGuard</strong>.<br><br>Como posso ajudar sua empresa hoje ou qual link suspeito deseja analisar?</div>
+                </div>
+            </div>
+            <div class="chat-footer">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Pergunte sobre os planos ou envie um link..." autocomplete="off">
+                <button class="chat-send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Logic -->
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const chatBody = document.getElementById('chatBody');
+        const chatInput = document.getElementById('chatInput');
+
+        function toggleChat(initialText = null) {
+            const isVisible = chatContainer.style.display === 'flex';
+            chatContainer.style.display = isVisible ? 'none' : 'flex';
+            if (!isVisible) {
+                chatInput.focus();
+                if (initialText) {
+                    chatInput.value = initialText;
+                    sendMessage();
+                }
+            }
+        }
+
+        function formatMessage(text) {
+            let escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            escaped = escaped.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+            return escaped.replace(/\n/g, '<br>');
+        }
+
+        function appendMessage(text, isUser, isError = false) {
+            const row = document.createElement('div');
+            row.className = `chat-row ${isUser ? 'user' : 'bot'}`;
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble ${isUser ? 'user' : 'bot'} ${isError ? 'error' : ''}`;
+            if (isUser) bubble.textContent = text;
+            else bubble.innerHTML = formatMessage(text);
+            row.appendChild(bubble);
+            chatBody.appendChild(row);
+            chatBody.scrollTop = chatBody.scrollHeight;
+            return row;
+        }
+
+        function appendTyping() {
+            const row = document.createElement('div');
+            row.className = 'chat-row bot';
+            row.innerHTML = '<div class="chat-bubble bot"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+            chatBody.appendChild(row);
+            chatBody.scrollTop = chatBody.scrollHeight;
+            return row;
+        }
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+            chatInput.value = '';
+            appendMessage(message, true);
+            const typing = appendTyping();
+            try {
+                const response = await fetch('http://localhost:8000/webhook/webchat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mensagem: message })
+                });
+                typing.remove();
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+                appendMessage(data.resposta, false);
+            } catch (err) {
+                typing.remove();
+                appendMessage("🚨 *Erro de conexão:*\nNão foi possível obter resposta da IA do PhishGuard. Certifique-se de que o backend está rodando localmente (via `python api.py` na porta 8000).", false, true);
+            }
+        }
+
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>

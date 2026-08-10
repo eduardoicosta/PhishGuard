@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>PhishGuard - Simulador WhatsApp</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        body { background-color: #eae6df; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .app-container { width: 100%; max-width: 800px; height: 90vh; background-color: #efeae2; box-shadow: 0 6px 18px rgba(0,0,0,0.15); display: flex; flex-direction: column; border-radius: 10px; overflow: hidden; }
+        .chat-header { background-color: #008069; color: white; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+        .chat-header-left { display: flex; align-items: center; gap: 12px; }
+        .bot-avatar { width: 40px; height: 40px; background-color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #008069; font-size: 20px; font-weight: bold; }
+        .bot-info h3 { font-size: 16px; font-weight: 600; }
+        .bot-info p { font-size: 12px; color: #e1f5fe; }
+        .chat-header-right { display: flex; gap: 20px; font-size: 18px; color: #f0f2f5; cursor: pointer; }
+        .chat-body { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-repeat: repeat; }
+        .message-row { display: flex; width: 100%; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .message-row.user { justify-content: flex-end; }
+        .message-row.bot { justify-content: flex-start; }
+        .bubble { max-width: 65%; padding: 8px 14px; border-radius: 8px; font-size: 14.5px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,0.1); word-wrap: break-word; white-space: pre-wrap; position: relative; }
+        .bubble.user { background-color: #d9fdd3; color: #111b21; border-top-right-radius: 0; }
+        .bubble.bot { background-color: #ffffff; color: #111b21; border-top-left-radius: 0; }
+        .bubble.error { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .message-time { font-size: 10px; color: #667781; text-align: right; margin-top: 4px; display: block; }
+        .typing-indicator { display: flex; gap: 4px; padding: 4px 8px; align-items: center; }
+        .typing-indicator span { width: 8px; height: 8px; background-color: #667781; border-radius: 50%; display: inline-block; animation: bounce 1.3s infinite ease-in-out; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+        .input-area { background-color: #f0f2f5; padding: 10px 16px; display: flex; align-items: center; gap: 12px; height: 60px; border-top: 1px solid #e9edef; }
+        .input-area i { color: #54656f; font-size: 22px; cursor: pointer; }
+        .input-form { flex: 1; display: flex; gap: 10px; }
+        .message-input { flex: 1; border: none; background-color: #ffffff; padding: 10px 16px; border-radius: 8px; outline: none; font-size: 15px; color: #111b21; }
+        .send-btn { background: none; border: none; color: #008069; font-size: 22px; cursor: pointer; display: flex; align-items: center; transition: transform 0.1s; }
+        .send-btn:hover { transform: scale(1.08); }
+        .pitch-banner { background-color: #ffe0b2; color: #e65100; padding: 8px 16px; font-size: 13px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; }
+        .pitch-banner button { background: none; border: none; color: #e65100; cursor: pointer; font-weight: bold; }
+        .bubble strong { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="pitch-banner" id="pitchBanner">
+            <span>💡 <strong>Hub Conversacional:</strong> Cole um link/texto para testar a inteligência do PhishGuard via WhatsApp.</span>
+            <button onclick="document.getElementById('pitchBanner').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <header class="chat-header">
+            <div class="chat-header-left">
+                <div class="bot-avatar"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="bot-info">
+                    <h3>PhishGuard Bot</h3>
+                    <p>Online • Hub Conversacional</p>
+                </div>
+            </div>
+            <div class="chat-header-right">
+                <i class="fa-solid fa-video"></i><i class="fa-solid fa-phone"></i><i class="fa-solid fa-ellipsis-vertical"></i>
+            </div>
+        </header>
+        <main class="chat-body" id="chatBody">
+            <div class="message-row bot">
+                <div class="bubble bot">
+                    Olá! Sou o assistente virtual do 🛡️ <strong>PhishGuard</strong>.<br><br>
+                    Envie qualquer mensagem ou link suspeito recebido no seu WhatsApp. Eu irei analisá-lo usando nossa inteligência!
+                    <span class="message-time" id="initialTime">00:00</span>
+                </div>
+            </div>
+        </main>
+        <footer class="input-area">
+            <i class="fa-regular fa-face-smile"></i><i class="fa-solid fa-paperclip"></i>
+            <form class="input-form" id="chatForm">
+                <input type="text" class="message-input" id="messageInput" placeholder="Cole aqui o link ou mensagem..." autocomplete="off" required>
+                <button type="submit" class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+            </form>
+            <i class="fa-solid fa-microphone"></i>
+        </footer>
+    </div>
+    <script>
+        const chatBody = document.getElementById('chatBody'), chatForm = document.getElementById('chatForm'), messageInput = document.getElementById('messageInput'), initialTimeSpan = document.getElementById('initialTime');
+        function getCurrentTime() {
+            const now = new Date();
+            return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        }
+        initialTimeSpan.textContent = getCurrentTime();
+        function formatWhatsAppMessage(text) {
+            let escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            escaped = escaped.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+            return escaped.replace(/\n/g, '<br>');
+        }
+        function appendMessage(text, isUser, isError = false) {
+            const row = document.createElement('div');
+            row.className = `message-row ${isUser ? 'user' : 'bot'}`;
+            const bubble = document.createElement('div');
+            bubble.className = `bubble ${isUser ? 'user' : 'bot'} ${isError ? 'error' : ''}`;
+            if (isUser) bubble.textContent = text;
+            else bubble.innerHTML = formatWhatsAppMessage(text);
+            const time = document.createElement('span');
+            time.className = 'message-time';
+            time.textContent = getCurrentTime();
+            bubble.appendChild(time);
+            row.appendChild(bubble);
+            chatBody.appendChild(row);
+            chatBody.scrollTop = chatBody.scrollHeight;
+            return row;
+        }
+        function appendTypingIndicator() {
+            const row = document.createElement('div');
+            row.className = 'message-row bot';
+            row.innerHTML = '<div class="bubble bot"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+            chatBody.appendChild(row);
+            chatBody.scrollTop = chatBody.scrollHeight;
+            return row;
+        }
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (!message) return;
+            messageInput.value = '';
+            appendMessage(message, true);
+            const typingIndicator = appendTypingIndicator();
+            try {
+                const response = await fetch('http://localhost:8000/webhook/whatsapp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mensagem: message })
+                });
+                typingIndicator.remove();
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+                appendMessage(data.resposta, false);
+            } catch (err) {
+                typingIndicator.remove();
+                appendMessage("🚨 *Erro de Conexão:*\nNão foi possível conectar à API do PhishGuard.\n\nCertifique-se de que o backend está rodando localmente (via `python api.py` na porta 8000).", false, true);
+            }
+        });
+    </script>
+</body>
+</html>
