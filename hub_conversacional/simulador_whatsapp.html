@@ -112,6 +112,15 @@
             chatBody.scrollTop = chatBody.scrollHeight;
             return row;
         }
+        // Identidade pseudônima do canal, gerada no dispositivo. O servidor a usa
+        // apenas para derivar um HMAC — o valor em claro nunca é armazenado.
+        const CHAVE_CONTA = 'phishguard_id_conta';
+        let idConta = localStorage.getItem(CHAVE_CONTA);
+        if (!idConta) {
+            idConta = 'anon-' + (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36));
+            localStorage.setItem(CHAVE_CONTA, idConta);
+        }
+
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const message = messageInput.value.trim();
@@ -119,19 +128,43 @@
             messageInput.value = '';
             appendMessage(message, true);
             const typingIndicator = appendTypingIndicator();
+
+            // Timeout no cliente: sem ele, uma API lenta deixa o indicador de
+            // digitação girando para sempre.
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 25000);
+
             try {
                 const response = await fetch('http://localhost:8000/webhook/whatsapp', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mensagem: message })
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                    body: JSON.stringify({ mensagem: message, perfil: 'B2C', id_conta: idConta }),
+                    signal: controller.signal
                 });
                 typingIndicator.remove();
-                if (!response.ok) throw new Error();
+                if (!response.ok) throw new Error(`A API respondeu HTTP ${response.status}.`);
                 const data = await response.json();
                 appendMessage(data.resposta, false);
+
+                const mascarados = data.privacidade && data.privacidade.dados_sensiveis_mascarados;
+                if (mascarados) {
+                    appendMessage(
+                        `🔒 *Privacidade:* ${mascarados} dado(s) pessoal(is) foram anonimizados antes da análise por IA. ` +
+                        `Sua mensagem não foi armazenada.`,
+                        false
+                    );
+                }
             } catch (err) {
                 typingIndicator.remove();
-                appendMessage("🚨 *Erro de Conexão:*\nNão foi possível conectar à API do PhishGuard.\n\nCertifique-se de que o backend está rodando localmente (via `python api.py` na porta 8000).", false, true);
+                const motivo = err && err.name === 'AbortError'
+                    ? 'A análise demorou mais que o esperado.'
+                    : 'Não foi possível conectar à API do PhishGuard.';
+                appendMessage(
+                    `🚨 *Erro de Conexão:*\n${motivo}\n\nCertifique-se de que o backend está rodando localmente (via \`python api.py\` na porta 8000).`,
+                    false, true
+                );
+            } finally {
+                clearTimeout(timer);
             }
         });
     </script>

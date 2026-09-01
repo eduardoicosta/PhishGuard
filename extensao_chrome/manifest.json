@@ -1,15 +1,17 @@
 {
   "manifest_version": 3,
   "name": "PhishGuard",
-  "version": "1.1.0",
-  "description": "Detecta e-mails de phishing no Gmail e Outlook Web usando IA do PhishGuard.",
+  "version": "2.0.0",
+  "description": "Proteção contra phishing no Gmail e Outlook Web com IA. Processamento em memória e retenção zero de dados pessoais (LGPD).",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "storage"
   ],
   "host_permissions": [
     "https://mail.google.com/*",
     "https://outlook.office.com/*",
+    "https://outlook.office365.com/*",
     "https://outlook.live.com/*",
     "http://localhost:8000/*",
     "http://127.0.0.1:8000/*"
@@ -17,11 +19,16 @@
   "background": {
     "service_worker": "background.js"
   },
+  "action": {
+    "default_title": "PhishGuard — proteção ativa",
+    "default_popup": "popup.html"
+  },
   "content_scripts": [
     {
       "matches": [
         "https://mail.google.com/*",
         "https://outlook.office.com/*",
+        "https://outlook.office365.com/*",
         "https://outlook.live.com/*"
       ],
       "js": ["content.js"],

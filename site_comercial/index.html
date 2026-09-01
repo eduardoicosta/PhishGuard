@@ -252,25 +252,46 @@
             return row;
         }
 
+        // Identidade pseudônima do visitante e vertente de interesse (B2C/B2B).
+        // O servidor recebe o valor apenas para derivar um HMAC irreversível.
+        const CHAVE_CONTA = 'phishguard_id_conta';
+        let idConta = localStorage.getItem(CHAVE_CONTA);
+        if (!idConta) {
+            idConta = 'anon-' + (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36));
+            localStorage.setItem(CHAVE_CONTA, idConta);
+        }
+        const perfilVisitante = localStorage.getItem('phishguard_perfil') || 'B2C';
+
         async function sendMessage() {
             const message = chatInput.value.trim();
             if (!message) return;
             chatInput.value = '';
             appendMessage(message, true);
             const typing = appendTyping();
+
+            // Timeout no cliente para não deixar o indicador de digitação preso.
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 25000);
+
             try {
                 const response = await fetch('http://localhost:8000/webhook/webchat', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mensagem: message })
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                    body: JSON.stringify({ mensagem: message, perfil: perfilVisitante, id_conta: idConta }),
+                    signal: controller.signal
                 });
                 typing.remove();
-                if (!response.ok) throw new Error();
+                if (!response.ok) throw new Error(`A API respondeu HTTP ${response.status}.`);
                 const data = await response.json();
                 appendMessage(data.resposta, false);
             } catch (err) {
                 typing.remove();
-                appendMessage("🚨 *Erro de conexão:*\nNão foi possível obter resposta da IA do PhishGuard. Certifique-se de que o backend está rodando localmente (via `python api.py` na porta 8000).", false, true);
+                const motivo = err && err.name === 'AbortError'
+                    ? 'A análise demorou mais que o esperado.'
+                    : 'Não foi possível obter resposta da IA do PhishGuard.';
+                appendMessage(`🚨 *Erro de conexão:*\n${motivo} Certifique-se de que o backend está rodando localmente (via \`python api.py\` na porta 8000).`, false, true);
+            } finally {
+                clearTimeout(timer);
             }
         }
 
