@@ -7,566 +7,244 @@
   const LOG_PREFIX = "[PhishGuard]";
 
   let ultimoEmailAnalisado = null;
+  let bannerNodeAtual = null; // Armazena o nó na RAM para evitar recálculo de tela (pisca-pisca)
   let debounceTimer = null;
   let analiseEmAndamento = false;
   let provedorAtual = null;
-
-  function logDebug(mensagem, detalhe) {
-    if (detalhe !== undefined) {
-      console.debug(LOG_PREFIX, mensagem, detalhe);
-    } else {
-      console.debug(LOG_PREFIX, mensagem);
-    }
-  }
+  let guardiaoOutlookTimer = null;
 
   function logAviso(mensagem, erro) {
-    if (erro) {
-      console.warn(LOG_PREFIX, mensagem, erro);
-    } else {
-      console.warn(LOG_PREFIX, mensagem);
-    }
+    if (erro) console.warn(LOG_PREFIX, mensagem, erro);
+    else console.warn(LOG_PREFIX, mensagem);
   }
 
-  function consultarElemento(seletorOuFn) {
-    try {
-      if (typeof seletorOuFn === "function") {
-        return seletorOuFn() || null;
-      }
-      return document.querySelector(seletorOuFn);
-    } catch (erro) {
-      logDebug("Seletor ignorado por erro de DOM.", erro);
-      return null;
-    }
+  function consultarElemento(seletor) {
+    try { return document.querySelector(seletor); } 
+    catch (erro) { return null; }
   }
 
   function consultarTexto(candidatos, extrator) {
     for (const candidato of candidatos) {
       const elemento = consultarElemento(candidato);
-      if (!elemento) {
-        continue;
-      }
-
+      if (!elemento) continue;
       try {
         const valor = extrator(elemento);
-        if (valor && String(valor).trim()) {
-          return String(valor).trim();
-        }
-      } catch (erro) {
-        logDebug("Falha ao extrair texto do elemento.", erro);
-      }
+        if (valor && String(valor).trim()) return String(valor).trim();
+      } catch (erro) {}
     }
-
     return "";
   }
 
   function detectarProvedor() {
     const hostname = window.location.hostname;
-
-    if (hostname === "mail.google.com") {
-      return "gmail";
-    }
-
-    if (hostname === "outlook.office.com" || hostname === "outlook.live.com") {
-      return "outlook";
-    }
-
+    if (hostname === "mail.google.com") return "gmail";
+    if (hostname === "outlook.office.com" || hostname === "outlook.live.com") return "outlook";
     return null;
   }
 
+  // --- MOTOR DE EXTRAÇÃO DE DADOS ---
   const PROVEDORES = {
     gmail: {
-      extrairAssunto() {
-        return consultarTexto(
-          ["h2.hP", "[data-thread-perm-id] h2", ".ha h2"],
-          (el) => el.textContent
-        );
-      },
-
+      extrairAssunto: () => consultarTexto(["h2.hP", "[data-thread-perm-id] h2", ".ha h2"], (el) => el.textContent),
       extrairRemetente() {
-        // Buscar o container da mensagem aberta no Gmail (classes .adn ou .gE)
-        // para garantir que a busca seja estrita à mensagem e nunca pegue o e-mail do cabeçalho global.
         const container = document.querySelector(".adn, .gE");
-
-        if (!container) {
-          logDebug("Container da mensagem aberta do Gmail (.adn ou .gE) não encontrado.");
-          return "desconhecido@desconhecido.com";
-        }
-
-        let remetenteEl = null;
-        try {
-          remetenteEl = 
-            container.querySelector("span[email]") ||
-            container.querySelector("[email]") ||
-            container.querySelector(".gD") ||
-            container.querySelector(".go");
-        } catch (erro) {
-          logDebug("Falha ao selecionar elemento do remetente dentro do container Gmail.", erro);
-        }
-
-        if (!remetenteEl) {
-          return "desconhecido@desconhecido.com";
-        }
-
-        try {
-          const email = remetenteEl.getAttribute("email") || remetenteEl.getAttribute("data-sender-email");
-          const nome = remetenteEl.textContent.trim();
-
-          if (email && nome) {
-            return `${nome} <${email}>`;
-          }
-
-          return email || nome || "desconhecido@desconhecido.com";
-        } catch (erro) {
-          logDebug("Falha ao extrair remetente do Gmail.", erro);
-          return "desconhecido@desconhecido.com";
-        }
+        if (!container) return "desconhecido@desconhecido.com";
+        let remetenteEl = container.querySelector("span[email]") || container.querySelector("[email]") || container.querySelector(".gD");
+        if (!remetenteEl) return "desconhecido@desconhecido.com";
+        const email = remetenteEl.getAttribute("email") || remetenteEl.getAttribute("data-sender-email");
+        const nome = remetenteEl.textContent.trim();
+        return (email && nome) ? `${nome} <${email}>` : email || nome || "desconhecido@desconhecido.com";
       },
-
-      extrairCorpoTexto() {
-        return consultarTexto(
-          [
-            ".ii.gt",                     // Seletor extremamente resiliente do Gmail (corpo completo)
-            ".a3s.aiL",                   // Corpo do e-mail clássico do Gmail
-            ".a3s",                       // Corpo alternativo
-            "[role='listitem'] .ii.gt"    // Corpo estruturado em lista de conversas
-          ],
-          (el) => el.innerText || el.textContent
-        );
-      },
-
-      obterContainerEmail() {
-        return (
-          consultarElemento(".nH.if") ||
-          consultarElemento(".nH") ||
-          consultarElemento("[role='main']")
-        );
-      },
+      extrairCorpoTexto: () => consultarTexto([".ii.gt", ".a3s.aiL", ".a3s"], (el) => el.innerText || el.textContent)
     },
-
     outlook: {
       extrairAssunto() {
-        const assuntoDireto = consultarTexto(
-          ['[aria-label="Subject"]', '[role="textbox"][aria-label*="Subject"]'],
-          (el) => el.textContent || el.value || el.innerText
-        );
-
-        if (assuntoDireto) {
-          return assuntoDireto;
+        const assunto = consultarTexto(['[aria-label="Subject"]', '[role="textbox"][aria-label*="Subject"]'], (el) => el.textContent || el.value);
+        if (assunto) return assunto;
+        const headings = document.querySelectorAll('[role="main"] [role="heading"], [role="main"] h1, [role="main"] h2');
+        for (const heading of headings) {
+          const texto = heading.textContent.trim();
+          if (texto && !texto.startsWith("From:") && !texto.startsWith("To:")) return texto;
         }
-
-        try {
-          const headings = document.querySelectorAll(
-            '[role="main"] [role="heading"], [role="main"] h1, [role="main"] h2, [role="main"] h3'
-          );
-
-          for (const heading of headings) {
-            const texto = heading.textContent.trim();
-            if (!texto) {
-              continue;
-            }
-
-            const pareceMetadado =
-              texto.startsWith("From:") ||
-              texto.startsWith("To:") ||
-              texto.startsWith("Cc:") ||
-              texto.startsWith("Bcc:") ||
-              /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/.test(texto) ||
-              /^\d{1,2}\/\d{1,2}\/\d{4}/.test(texto);
-
-            if (!pareceMetadado) {
-              return texto;
-            }
-          }
-        } catch (erro) {
-          logDebug("Falha ao extrair assunto do Outlook.", erro);
-        }
-
         return "";
       },
-
       extrairRemetente() {
-        // 1. Tentar encontrar o container principal do e-mail no Outlook
-        const container = PROVEDORES.outlook.obterContainerEmail() || document;
-        
-        // 2. Procurar especificamente na área de cabeçalho (evitando o corpo do texto)
-        // O corpo do texto normalmente fica em [role="document"] ou dentro de um elemento com aria-label "Message body"
+        const container = document.querySelector('[role="main"]') || document;
         const corpoEl = container.querySelector('[role="document"], [aria-label*="Message body"]');
-        
-        // Função auxiliar para validar se uma string contém um e-mail válido
-        const contemEmail = (texto) => {
-          return /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(texto);
-        };
-
-        // Função para limpar e formatar o remetente
-        const formatarRemetente = (rawText) => {
-          if (!rawText) return null;
-          let texto = rawText.trim();
-          // Remove prefixos comuns do Outlook como "From:", "De:", "Remetente:"
-          texto = texto.replace(/^(From|De|Remetente):\s*/i, "");
-          return texto.trim();
-        };
-
-        // Seletores específicos de remetente / cabeçalho do Outlook
-        const seletoresCandidatos = [
-          // Elementos com atributo title contendo e-mail (comum no Outlook)
-          'span[title*="@"]',
-          'div[title*="@"]',
-          'button[title*="@"]',
-          'a[href^="mailto:"]',
-          // Elementos com aria-label de remetente
-          '[aria-label^="From"]',
-          '[aria-label*="From:"]',
-          '[aria-label^="De:"]',
-          '[aria-label*="De:"]',
-          '[aria-label^="Remetente"]',
-          '[aria-label*="Remetente:"]',
-          // Outros seletores conhecidos de OWA
-          '[data-test-id="sender-address"]',
-          '[data-test-id="sender"]',
-          'span[email]',
-          '.PersonaHeader',
-          '.ms-Persona'
-        ];
-
-        for (const seletor of seletoresCandidatos) {
-          try {
-            const elementos = container.querySelectorAll(seletor);
-            for (const el of elementos) {
-              // Garante que o elemento está FORA do corpo do e-mail para evitar falsos positivos
-              if (corpoEl && corpoEl.contains(el)) {
-                continue;
-              }
-
-              // Verifica se tem title contendo e-mail
-              const titleValue = el.getAttribute("title");
-              if (titleValue && contemEmail(titleValue)) {
-                return formatarRemetente(titleValue);
-              }
-
-              // Verifica se é link de mailto
-              const hrefValue = el.getAttribute("href");
-              if (hrefValue && hrefValue.startsWith("mailto:")) {
-                const emailDoMailto = hrefValue.replace(/^mailto:/i, "").trim();
-                if (contemEmail(emailDoMailto)) {
-                  // Pode ser que o texto do elemento seja o nome
-                  const nome = el.textContent.trim();
-                  return nome && nome !== emailDoMailto ? `${nome} <${emailDoMailto}>` : emailDoMailto;
-                }
-              }
-
-              // Verifica se o aria-label contém e-mail ou dados úteis
-              const ariaValue = el.getAttribute("aria-label");
-              if (ariaValue && (contemEmail(ariaValue) || ariaValue.toLowerCase().startsWith("from") || ariaValue.toLowerCase().startsWith("de"))) {
-                return formatarRemetente(ariaValue);
-              }
-
-              // Verifica o textContent do próprio elemento
-              const textValue = el.textContent.trim();
-              if (contemEmail(textValue) || textValue.startsWith("From:") || textValue.startsWith("De:")) {
-                return formatarRemetente(textValue);
-              }
-            }
-          } catch (e) {
-            logDebug("Erro ao analisar seletor no Outlook: " + seletor, e);
+        const contemEmail = (texto) => /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(texto);
+        const limpa = (t) => t ? t.trim().replace(/^(From|De|Remetente):\s*/i, "").trim() : null;
+        const seletores = ['span[title*="@"]', 'div[title*="@"]', 'button[title*="@"]', 'a[href^="mailto:"]', '[aria-label^="From"]', '[aria-label*="From:"]', '[aria-label^="De:"]', '[data-test-id="sender-address"]', 'span[email]'];
+        for (const seletor of seletores) {
+          for (const el of container.querySelectorAll(seletor)) {
+            if (corpoEl && corpoEl.contains(el)) continue;
+            const title = el.getAttribute("title");
+            if (title && contemEmail(title)) return limpa(title);
+            const aria = el.getAttribute("aria-label");
+            if (aria && (contemEmail(aria) || aria.toLowerCase().startsWith("from"))) return limpa(aria);
+            const text = el.textContent.trim();
+            if (contemEmail(text) || text.startsWith("From:")) return limpa(text);
           }
         }
-
-        // 3. Fallback genérico: varrer elementos de cabeçalho (headings/spans/divs) fora do corpo do e-mail que contenham "From:" ou "De:"
-        try {
-          const elementosCabecalho = container.querySelectorAll('h1, h2, h3, [role="heading"], span, div');
-          for (const el of elementosCabecalho) {
-            if (corpoEl && corpoEl.contains(el)) {
-              continue;
-            }
-            const texto = el.textContent.trim();
-            if ((texto.startsWith("From:") || texto.startsWith("De:") || texto.startsWith("Remetente:")) && contemEmail(texto)) {
-              return formatarRemetente(texto);
-            }
-          }
-        } catch (erro) {
-          logDebug("Falha no fallback de extração de remetente do Outlook.", erro);
-        }
-
-        // 4. Último recurso: varrer qualquer elemento fora do corpo que se pareça com um e-mail
-        try {
-          const todosElementos = container.querySelectorAll('span, div, a');
-          for (const el of todosElementos) {
-            if (corpoEl && corpoEl.contains(el)) {
-              continue;
-            }
-            const texto = el.textContent.trim();
-            // Evita strings muito longas para não capturar textos incorretos
-            if (texto.length < 150 && contemEmail(texto)) {
-              // Verifica se tem formato de email ou nome + email
-              const match = texto.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-              if (match) {
-                return formatarRemetente(texto);
-              }
-            }
-          }
-        } catch (erro) {
-          logDebug("Falha no último recurso de remetente do Outlook.", erro);
-        }
-
         return "desconhecido@desconhecido.com";
       },
-
-      extrairCorpoTexto() {
-        return consultarTexto(
-          [
-            '[role="document"]',
-            '[aria-label="Message body"]',
-            '[aria-label*="Message body"]',
-            '[data-app-section="ReadingPane"] [role="document"]',
-          ],
-          (el) => el.innerText
-        );
-      },
-
-      obterContainerEmail() {
-        return (
-          consultarElemento('[role="main"]') ||
-          consultarElemento('[data-app-section="ReadingPane"]') ||
-          consultarElemento("#ReadingPaneContainerId") ||
-          consultarElemento(".ReadingPaneContainer")
-        );
-      },
-    },
+      extrairCorpoTexto: () => consultarTexto(['[role="document"]', '[aria-label="Message body"]', '[aria-label*="Message body"]'], (el) => el.innerText)
+    }
   };
 
-  function obterProvedor() {
-    if (!provedorAtual) {
-      provedorAtual = detectarProvedor();
-    }
-    return provedorAtual ? PROVEDORES[provedorAtual] : null;
-  }
-
   function extrairDadosEmail() {
-    const provedor = obterProvedor();
-    if (!provedor) {
-      return null;
-    }
-
-    try {
-      const assunto = provedor.extrairAssunto();
-      const corpoTexto = provedor.extrairCorpoTexto();
-      const remetente = provedor.extrairRemetente();
-
-      if (!assunto || !corpoTexto) {
-        return null;
-      }
-
-      return { assunto, corpoTexto, remetente };
-    } catch (erro) {
-      logAviso("Não foi possível extrair dados do e-mail aberto.", erro);
-      return null;
-    }
+    if (!provedorAtual) provedorAtual = detectarProvedor();
+    if (!provedorAtual) return null;
+    const prov = PROVEDORES[provedorAtual];
+    const assunto = prov.extrairAssunto();
+    const corpoTexto = prov.extrairCorpoTexto();
+    const remetente = prov.extrairRemetente();
+    if (!assunto || !corpoTexto) return null;
+    return { assunto, corpoTexto, remetente };
   }
 
-  function limparBannersPhishGuard() {
-    try {
-      const bannerExistente = document.getElementById(BANNER_ID);
-      if (bannerExistente) {
-        bannerExistente.remove();
-        logDebug("Banner do PhishGuard removido.");
-      }
-      const todosBanners = document.querySelectorAll(`#${BANNER_ID}`);
-      todosBanners.forEach((banner) => {
-        banner.remove();
-        logDebug("Banner órfão do PhishGuard removido.");
-      });
-    } catch (erro) {
-      logDebug("Falha ao limpar banners anteriores.", erro);
-    }
-  }
+  // --- MOTOR DE UI / BANNER ---
+  const SVG_ESCUDO = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.5l7 2.6v5.6c0 4.7-3 8.4-7 10.3-4-1.9-7-5.6-7-10.3V5.1l7-2.6z" fill="currentColor" fill-opacity="0.16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M8.6 12.2l2.3 2.3 4.5-4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-  function mostrarBannerCarregando() {
-    limparBannersPhishGuard();
-
-    const provedor = obterProvedor();
-    if (!provedor) {
-      return;
-    }
-
-    const container = provedor.obterContainerEmail();
-    if (!container) {
-      logAviso("Container do e-mail não encontrado. Banner não exibido.");
-      return;
-    }
-
+  function criarElementoBanner(corStatus, textoTitulo, textoExplicacao) {
     const banner = document.createElement("div");
     banner.id = BANNER_ID;
     banner.setAttribute("role", "alert");
-    banner.textContent = "🛡️ PhishGuard: Analisando e-mail...";
-
-    aplicarEstilosBase(banner, false);
-    banner.style.background = "linear-gradient(135deg, #4b5563 0%, #6b7280 100%)";
-    banner.style.color = "#ffffff";
-
-    try {
-      container.insertBefore(banner, container.firstChild);
-    } catch (erro) {
-      logAviso("Falha ao injetar banner no DOM.", erro);
-    }
-  }
-
-  function aplicarEstilosBase(banner, compacto) {
-    const estilosComuns = [
-      "box-sizing: border-box",
-      "width: 100%",
+    
+    // Animação e estilos aplicados diretamente no elemento
+    banner.style.cssText = [
+      "box-sizing: border-box", "position: relative", "width: 100%", "margin: 16px 0", "z-index: 10",
+      "padding: 16px 20px", "display: flex", "align-items: flex-start", "gap: 14px",
       "font-family: 'Segoe UI', 'Google Sans', Roboto, Arial, sans-serif",
-      "letter-spacing: 0.2px",
-      "border-radius: 8px",
-      "position: relative",
-      "z-index: 9999",
-      "display: flex",
-      "align-items: center",
-      "justify-content: center",
-      "gap: 8px",
-      "text-align: center",
-      "line-height: 1.45",
-      "margin: 0 0 12px 0",
-    ];
+      "background: #1e293b", "color: #f8fafc", "border-radius: 12px",
+      `border-left: 7px solid ${corStatus}`, "box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25)",
+      "text-align: left", "transition: opacity 0.2s ease-in"
+    ].join(";");
 
-    if (compacto) {
-      banner.style.cssText = estilosComuns.concat([
-        "background: linear-gradient(135deg, #15803d 0%, #22c55e 100%)",
-        "color: #ffffff",
-        "font-size: 12px",
-        "font-weight: 600",
-        "padding: 8px 14px",
-        "box-shadow: 0 2px 8px rgba(21, 128, 61, 0.25)",
-        "border: 1px solid rgba(255, 255, 255, 0.25)",
-      ]).join(";");
-      return;
+    const conteudo = document.createElement("div");
+    conteudo.style.cssText = "display: flex; flex-direction: column; gap: 5px; flex: 1;";
+
+    const titulo = document.createElement("div");
+    titulo.style.cssText = "display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; color: #f8fafc; letter-spacing: 0.3px;";
+    
+    const icone = document.createElement("div");
+    icone.style.cssText = `display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 0; color: ${corStatus};`;
+    icone.innerHTML = SVG_ESCUDO;
+
+    const textoTituloEl = document.createElement("span");
+    textoTituloEl.textContent = textoTitulo;
+
+    titulo.appendChild(icone);
+    titulo.appendChild(textoTituloEl);
+    conteudo.appendChild(titulo);
+
+    if (textoExplicacao) {
+      const descricao = document.createElement("div");
+      descricao.style.cssText = "font-size: 13px; font-weight: 400; color: #cbd5e1; line-height: 1.6;";
+      descricao.textContent = textoExplicacao;
+      conteudo.appendChild(descricao);
     }
 
-    banner.style.cssText = estilosComuns.concat([
-      "font-size: 14px",
-      "font-weight: 700",
-      "padding: 14px 18px",
-      "box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18)",
-      "border: 1px solid rgba(255, 255, 255, 0.22)",
-    ]).join(";");
+    banner.appendChild(conteudo);
+    return banner;
   }
 
-  function criarBanner(resultado) {
-    limparBannersPhishGuard();
+  function removerBannersAntigos() {
+    document.querySelectorAll(`#${BANNER_ID}`).forEach(b => b.remove());
+  }
 
-    const provedor = obterProvedor();
-    if (!provedor) {
-      return;
-    }
-
-    const container = provedor.obterContainerEmail();
-    if (!container) {
-      logAviso("Container do e-mail não encontrado. Banner não exibido.");
-      return;
-    }
-
-    const banner = document.createElement("div");
-    banner.id = BANNER_ID;
-    banner.setAttribute("role", "alert");
-
-    const isPhishing = Boolean(resultado.is_phishing);
-    const explicacao = (resultado.explicacao || "").trim();
-
-    if (isPhishing) {
-      banner.textContent = `🚨 ALERTA PHISHGUARD — Risco Crítico | Motivo: ${explicacao || "Padrões suspeitos identificados pela IA."}`;
-      aplicarEstilosBase(banner, false);
-      banner.style.background = "linear-gradient(135deg, #991b1b 0%, #dc2626 100%)";
-      banner.style.color = "#ffffff";
-    } else {
-      banner.textContent = `✅ VERIFICADO POR IA | ${explicacao || "E-mail analisado e considerado legítimo."}`;
-      aplicarEstilosBase(banner, false);
-      banner.style.background = "linear-gradient(135deg, #166534 0%, #22c55e 100%)";
-      banner.style.color = "#ffffff";
-    }
-
+  function injetarNaTela(bannerNode) {
+    if (!bannerNode) return;
     try {
-      container.insertBefore(banner, container.firstChild);
+      if (provedorAtual === "gmail") {
+        // GMAIL: Procura a div exata do texto do e-mail e injeta o banner LOGO ACIMA dela (abaixo do remetente).
+        const corpoGmail = document.querySelector('.a3s.aiL') || document.querySelector('.ii.gt');
+        if (corpoGmail && corpoGmail.parentElement) {
+          corpoGmail.parentElement.insertBefore(bannerNode, corpoGmail);
+        }
+      } else if (provedorAtual === "outlook") {
+        // OUTLOOK: o React da Microsoft reconcilia o container do corpo e destrói
+        // qualquer nó "irmão" estranho que injetamos ali (efeito pisca-pisca).
+        // Solução: injetar DENTRO do corpo do e-mail, como primeiro filho. Essa região
+        // é preenchida uma única vez via innerHTML (HTML do e-mail) e NÃO passa por
+        // reconciliação de filhos pelo React — é uma "zona cega" estável.
+        const corpoOutlook =
+          document.querySelector('[aria-label="Message body"]') ||
+          document.querySelector('[aria-label*="Message body"]') ||
+          document.querySelector('[role="document"]');
+        if (corpoOutlook) {
+          corpoOutlook.insertBefore(bannerNode, corpoOutlook.firstChild);
+        } else {
+          // Fallback: acima do painel de leitura, se o corpo ainda não montou.
+          const painel = document.querySelector('[role="main"]');
+          if (painel) painel.insertBefore(bannerNode, painel.firstChild);
+        }
+      }
     } catch (erro) {
-      logAviso("Falha ao injetar banner no DOM.", erro);
+      logAviso("Falha na injeção estrutural.", erro);
     }
   }
 
-  function emailEstaAberto() {
-    return Boolean(extrairDadosEmail());
-  }
-
-async function analisarEmailAtual() {
+  async function analisarEmailAtual() {
     if (analiseEmAndamento) return;
-
     const dados = extrairDadosEmail();
     if (!dados) return;
 
-    // Verificação simples: se o assunto for igual ao do último e-mail, não analise de novo
     const idUnicoEmail = dados.assunto + dados.remetente;
     if (idUnicoEmail === ultimoEmailAnalisado) return;
 
     analiseEmAndamento = true;
-    ultimoEmailAnalisado = idUnicoEmail; // Atualiza o ID
+    ultimoEmailAnalisado = idUnicoEmail; 
     
-    mostrarBannerCarregando();
+    // Cria o banner de carregamento e guarda na RAM
+    removerBannersAntigos();
+    bannerNodeAtual = criarElementoBanner("#64748b", "PHISHGUARD IA: ANALISANDO E-MAIL...", null);
+    injetarNaTela(bannerNodeAtual);
 
     try {
-        // ENVIAR JSON DIRETO (SEM BTOA/BASE64)
-        const resposta = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                assunto: dados.assunto, 
-                corpo_texto: dados.corpoTexto, 
-                remetente: dados.remetente 
-            }),
+        // O fetch NÃO pode sair da página (https://outlook.live.com → http://localhost
+        // é bloqueado pelo Private Network Access do Chrome). Delegamos ao service worker
+        // da extensão, que fala com o localhost sem CORS nem restrição de rede privada.
+        const resultado = await new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage(
+                {
+                    type: "ANALISAR_EMAIL",
+                    payload: { assunto: dados.assunto, corpo_texto: dados.corpoTexto, remetente: dados.remetente },
+                },
+                (resp) => {
+                    if (chrome.runtime.lastError) {
+                        reject(new Error(chrome.runtime.lastError.message));
+                    } else if (!resp || !resp.ok) {
+                        reject(new Error((resp && resp.error) || "Sem resposta do background."));
+                    } else {
+                        resolve(resp.data);
+                    }
+                }
+            );
         });
 
-        if (!resposta.ok) throw new Error("Falha na API");
+        const isPhishing = Boolean(resultado.is_phishing);
+        const corStatus = isPhishing ? "#dc2626" : "#10b981";
+        const textoTitulo = isPhishing ? "PHISHGUARD IA: AMEAÇA DETECTADA" : "PHISHGUARD IA: E-MAIL SEGURO";
+        const textoExplicacao = (resultado.explicacao || (isPhishing ? "Padrões suspeitos identificados." : "E-mail considerado legítimo.")).trim();
 
-        const resultado = await resposta.json();
-        
-        criarBanner(resultado);
+        // Atualiza o banner oficial e substitui o de carregamento
+        removerBannersAntigos();
+        bannerNodeAtual = criarElementoBanner(corStatus, textoTitulo, textoExplicacao);
+        injetarNaTela(bannerNodeAtual);
+
     } catch (erro) {
         logAviso("Falha ao analisar.", erro);
-        limparBannersPhishGuard();
+        removerBannersAntigos();
+        bannerNodeAtual = null;
     } finally {
         analiseEmAndamento = false;
     }
-}
-
-  function agendarAnalise() {
-    clearTimeout(debounceTimer);
-
-    debounceTimer = setTimeout(() => {
-      try {
-        if (!obterProvedor()) {
-          return;
-        }
-
-        if (!emailEstaAberto()) {
-          limparBannersPhishGuard();
-          ultimoEmailAnalisado = null;
-          return;
-        }
-
-        analisarEmailAtual();
-      } catch (erro) {
-        logAviso("Erro durante o ciclo de análise.", erro);
-      }
-    }, DEBOUNCE_MS);
   }
 
-function iniciarObservador() {
+  function iniciarObservador() {
     provedorAtual = detectarProvedor();
+    if (!provedorAtual) return;
 
-    if (!provedorAtual) {
-      logDebug("Provedor de e-mail não suportado nesta página.");
-      return;
-    }
-
-    logDebug(`PhishGuard ativo para: ${provedorAtual}`);
-
-    // Variável para armazenar o último ID/assunto analisado e evitar reanálises desnecessárias
     let ultimoAssuntoProcessado = "";
 
     const verificarMudancaEmail = () => {
@@ -575,39 +253,51 @@ function iniciarObservador() {
         ultimoAssuntoProcessado = dados.assunto;
         analisarEmailAtual();
       } else if (!dados) {
-        limparBannersPhishGuard();
+        removerBannersAntigos();
         ultimoAssuntoProcessado = "";
+        bannerNodeAtual = null;
       }
     };
 
-    // Observador leve focado apenas nas mudanças do container principal (sem subtree global pesada)
     const observer = new MutationObserver(() => {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(verificarMudancaEmail, 400); // Debounce reduzido para 400ms para maior agilidade
+      debounceTimer = setTimeout(verificarMudancaEmail, 400); 
     });
 
-    const containerAlvo = document.body; 
-    observer.observe(containerAlvo, {
-      childList: true,
-      // Removido o 'subtree: true' excessivo para evitar travamento de performance
-    });
+    observer.observe(document.body, { childList: true, subtree: true });
 
-    // Eventos de navegação SPA (mudança de e-mail ao clicar na lista)
+    // GUARDIÃO OUTLOOK (rede de segurança):
+    // Com a injeção na "zona cega" (dentro do corpo do e-mail) o React não destrói mais
+    // o banner, então isto quase nunca dispara. Um MutationObserver recoloca o nó da RAM
+    // no MESMO tick (antes do paint) caso algo o remova, e um intervalo lento cobre o
+    // caso raro do corpo do e-mail inteiro ser trocado pelo React.
+    if (provedorAtual === "outlook") {
+      let checagemAgendada = false;
+      const reinjetarSeSumiu = () => {
+        checagemAgendada = false;
+        if (bannerNodeAtual && !document.contains(bannerNodeAtual)) {
+          injetarNaTela(bannerNodeAtual);
+        }
+      };
+      // Coalesce as muitas mutações do OWA numa única checagem por frame.
+      const agendarChecagem = () => {
+        if (checagemAgendada) return;
+        checagemAgendada = true;
+        requestAnimationFrame(reinjetarSeSumiu);
+      };
+
+      const moGuardiao = new MutationObserver(agendarChecagem);
+      moGuardiao.observe(document.body, { childList: true, subtree: true });
+
+      clearInterval(guardiaoOutlookTimer);
+      guardiaoOutlookTimer = setInterval(reinjetarSeSumiu, 1000);
+    }
+
     window.addEventListener("hashchange", () => {
-      logDebug("Mudança de URL detectada (hashchange).");
-      limparBannersPhishGuard();
       ultimoAssuntoProcessado = "";
       setTimeout(verificarMudancaEmail, 300);
     });
 
-    window.addEventListener("popstate", () => {
-      logDebug("Mudança de URL detectada (popstate).");
-      limparBannersPhishGuard();
-      ultimoAssuntoProcessado = "";
-      setTimeout(verificarMudancaEmail, 300);
-    });
-
-    // Executa na inicialização caso já haja um e-mail aberto
     verificarMudancaEmail();
   }
 
