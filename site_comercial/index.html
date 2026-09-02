@@ -3,101 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhishGuard - Inteligência contra Phishing B2B</title>
-    <!-- Font Awesome -->
+    <title>PhishGuard — Proteção contra Phishing para Você e para sua Empresa</title>
+    <meta name="description" content="PhishGuard: SECaaS híbrido com PhishGuard Personal (proteção individual e familiar) e PhishGuard Enterprise (governança de SOC corporativo). Arquitetura de Retenção Zero e anonimização de dados antes da IA.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Base and variables */
+        /* ===================== Fundamentos e paleta ===================== *
+         * Identidade mantida: fundo escuro + verde esmeralda. A "repaginação"
+         * está na hierarquia tipográfica, no espaçamento e na introdução de
+         * duas seções novas: o alternador de público (Pessoal/Empresas) e a
+         * seção de Retenção Zero, que é o argumento de confiança central do
+         * produto para o público B2C.
+         */
         :root {
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
+            --bg-dark: #0b1220;
+            --bg-darker: #070c17;
+            --bg-card: #131c30;
+            --bg-card-alto: #182338;
             --primary: #10b981;
             --primary-hover: #059669;
+            --primary-soft: rgba(16, 185, 129, 0.12);
+            --primary-border: rgba(16, 185, 129, 0.3);
+            --accent: #34d399;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --border: #334155;
+            --text-fraco: #64748b;
+            --border: #1f2b42;
+            --danger: #f87171;
+            --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.6; }
+        @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+        body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.65; }
         a { color: inherit; text-decoration: none; }
-        
-        /* Navbar */
-        header { background-color: rgba(15, 23, 42, 0.95); position: fixed; top: 0; width: 100%; border-bottom: 1px solid var(--border); z-index: 100; backdrop-filter: blur(8px); }
-        .nav-container { max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; color: var(--primary); }
-        .logo img { height: 35px; border-radius: 4px; }
-        .nav-links { display: flex; gap: 30px; list-style: none; font-weight: 500; }
-        .nav-links li a:hover { color: var(--primary); transition: color 0.2s; }
-        
-        /* Hero Section */
-        .hero { padding: 160px 20px 100px; text-align: center; max-width: 900px; margin: 0 auto; }
-        .hero h1 { font-size: 48px; font-weight: 800; line-height: 1.2; margin-bottom: 20px; background: linear-gradient(to right, #ffffff, #10b981); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero p { font-size: 18px; color: var(--text-muted); margin-bottom: 40px; }
-        .btn { display: inline-flex; align-items: center; gap: 10px; background-color: var(--primary); color: #0f172a; padding: 12px 28px; border-radius: 6px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.2s; border: none; }
-        .btn:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
-        .btn-outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-main); margin-left: 15px; }
-        .btn-outline:hover { background-color: rgba(255, 255, 255, 0.05); }
-        section { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
-        .section-title { text-align: center; margin-bottom: 50px; }
-        .section-title h2 { font-size: 32px; font-weight: 700; margin-bottom: 15px; }
+        img { max-width: 100%; }
+        section { padding: 96px 20px; max-width: 1180px; margin: 0 auto; }
+        .secao-alt { background: linear-gradient(180deg, transparent, rgba(16,185,129,0.035) 12%, rgba(16,185,129,0.035) 88%, transparent); }
+        .eyebrow {
+            display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700;
+            letter-spacing: .06em; text-transform: uppercase; color: var(--accent);
+            background: var(--primary-soft); border: 1px solid var(--primary-border);
+            padding: 6px 14px; border-radius: 999px; margin-bottom: 18px;
+        }
+        .section-title { text-align: center; max-width: 720px; margin: 0 auto 56px; }
+        .section-title h2 { font-size: 34px; font-weight: 800; margin-bottom: 14px; letter-spacing: -.01em; }
         .section-title p { color: var(--text-muted); font-size: 16px; }
-        .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        .card { background-color: var(--bg-card); border: 1px solid var(--border); padding: 40px 30px; border-radius: 12px; transition: transform 0.2s, border-color 0.2s; }
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .card-icon { font-size: 36px; color: var(--primary); margin-bottom: 20px; }
-        .card h3 { font-size: 20px; margin-bottom: 12px; }
+
+        /* ===================== Navbar ===================== */
+        /* Sem backdrop-filter: em paginas longas com header fixo, o blur
+           continuo por tras de um elemento position:fixed obriga o navegador a
+           recompor a camada a cada frame de rolagem, o que e caro em GPUs mais
+           fracas e pode causar engasgos visiveis. Um fundo solido semi-opaco
+           (com leve transparencia) da o mesmo efeito de "flutuar sobre o
+           conteudo" sem esse custo. translateZ(0) mantem o header na sua
+           propria camada de composicao, isolado do restante da pagina. */
+        header { background-color: rgba(7, 11, 20, 0.96); position: fixed; top: 0; width: 100%; border-bottom: 1px solid var(--border); z-index: 200; transform: translateZ(0); }
+        .nav-container { max-width: 1180px; margin: 0 auto; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 18px; }
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; color: var(--text-main); letter-spacing: -.01em; }
+        .logo img { height: 32px; border-radius: 8px; }
+        .nav-links { display: flex; gap: 28px; list-style: none; font-weight: 500; font-size: 14.5px; color: var(--text-muted); }
+        .nav-links li a:hover { color: var(--primary); transition: color 0.2s; }
+        .nav-cta { display: flex; align-items: center; gap: 10px; }
+
+        /* Alternador de público — presente na navbar (compacto) e no hero (grande) */
+        .toggle-publico { display: inline-flex; background: var(--bg-card); border: 1px solid var(--border); border-radius: 999px; padding: 4px; gap: 2px; }
+        .toggle-publico button {
+            border: none; background: none; color: var(--text-muted); font-family: inherit; font-weight: 700;
+            font-size: 13px; padding: 8px 16px; border-radius: 999px; cursor: pointer; transition: all .18s;
+            display: flex; align-items: center; gap: 7px; white-space: nowrap;
+        }
+        .toggle-publico button.ativo { background: var(--primary); color: #052e21; }
+        .toggle-publico.grande button { font-size: 14.5px; padding: 11px 22px; }
+
+        .btn { display: inline-flex; align-items: center; gap: 10px; background-color: var(--primary); color: #052e21; padding: 13px 26px; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s; border: none; }
+        .btn:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+        .btn-outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background-color: rgba(255, 255, 255, 0.05); border-color: var(--primary-border); }
+        .btn-sm { padding: 9px 16px; font-size: 13.5px; }
+
+        /* ===================== Hero ===================== */
+        .hero { padding: 168px 20px 88px; text-align: center; max-width: 880px; margin: 0 auto; }
+        .hero .toggle-publico { margin-bottom: 26px; }
+        .hero h1 { font-size: 46px; font-weight: 800; line-height: 1.18; margin-bottom: 20px; letter-spacing: -.02em; }
+        .hero h1 .marca-degrade { background: linear-gradient(to right, #ffffff, var(--primary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p.subtitulo { font-size: 17.5px; color: var(--text-muted); margin-bottom: 36px; max-width: 640px; margin-left: auto; margin-right: auto; }
+        .hero-ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 44px; }
+
+        /* Selos de confiança: 4 badges estritamente lado a lado no desktop.
+           Grid de 4 colunas iguais evita a quebra 3+1 causada pelo flex-wrap
+           quando a soma das larguras naturais ultrapassa a linha. */
+        .selo-tira {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+            align-items: stretch; width: 100%;
+        }
+        .selo-item {
+            display: flex; align-items: center; justify-content: center; gap: 9px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            padding: 10px 14px; border-radius: 10px; font-size: 12.5px; color: var(--text-muted);
+            font-weight: 600; text-align: center; line-height: 1.4;
+        }
+        @media (max-width: 860px) { .selo-tira { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 520px) { .selo-tira { grid-template-columns: 1fr; } }
+        .selo-item i { color: var(--primary); font-size: 15px; }
+        .selo-item strong { color: var(--text-main); }
+
+        /* ===================== Canais (Hub Conversacional) ===================== */
+        .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+        .card { background-color: var(--bg-card); border: 1px solid var(--border); padding: 34px 28px; border-radius: 14px; transition: transform 0.2s, border-color 0.2s; }
+        .card:hover { transform: translateY(-4px); border-color: var(--primary-border); }
+        .card-icon { width: 52px; height: 52px; border-radius: 12px; background: var(--primary-soft); color: var(--primary); font-size: 22px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+        .card h3 { font-size: 18.5px; margin-bottom: 10px; font-weight: 700; }
         .card p { color: var(--text-muted); font-size: 14.5px; }
-        .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 900px; margin: 0 auto; }
-        .plan-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 40px 30px; display: flex; flex-direction: column; position: relative; }
-        .plan-card.enterprise { border-color: var(--primary); }
-        .plan-tag { position: absolute; top: 15px; right: 15px; background-color: var(--primary); color: #0f172a; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
-        .plan-name { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
-        .plan-price { font-size: 36px; font-weight: 800; margin-bottom: 5px; display: flex; align-items: baseline; }
-        .plan-price span { font-size: 14px; color: var(--text-muted); font-weight: 400; }
-        .plan-features { list-style: none; margin: 30px 0; display: flex; flex-direction: column; gap: 15px; flex: 1; }
-        .plan-features li { display: flex; align-items: center; gap: 10px; font-size: 14px; }
-        .plan-features i { color: var(--primary); }
+        .card .card-tag { display: inline-block; margin-top: 14px; font-size: 11.5px; font-weight: 700; color: var(--accent); background: var(--primary-soft); border: 1px solid var(--primary-border); padding: 3px 10px; border-radius: 999px; }
+
+        /* ===================== Retenção Zero / Privacidade ===================== */
+        .privacidade-intro {
+            display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: center; margin-bottom: 64px;
+        }
+        @media (max-width: 900px) { .privacidade-intro { grid-template-columns: 1fr; } }
+        .privacidade-intro h2 { font-size: 30px; font-weight: 800; margin-bottom: 16px; letter-spacing: -.01em; }
+        .privacidade-intro > div:first-child p { color: var(--text-muted); font-size: 15.5px; margin-bottom: 14px; }
+        .privacidade-intro > div:first-child p strong { color: var(--text-main); }
+
+        /* Painel "antes / depois" do mascaramento — o argumento visual central */
+        .demo-mascaramento { background: var(--bg-darker); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+        .demo-mascaramento .demo-topo { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border); }
+        .demo-topo .ponto { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+        .demo-topo span.rotulo { margin-left: 8px; font-size: 12px; color: var(--text-fraco); font-weight: 600; }
+        .demo-corpo { padding: 18px 18px 20px; }
+        .demo-linha { font-size: 12px; font-weight: 700; color: var(--text-fraco); text-transform: uppercase; letter-spacing: .06em; margin: 14px 0 8px; }
+        .demo-linha:first-child { margin-top: 0; }
+        .demo-texto { font-family: "Cascadia Code", Consolas, monospace; font-size: 13px; line-height: 1.7; padding: 12px 14px; border-radius: 8px; }
+        .demo-texto.original { background: rgba(248, 113, 113, 0.07); border: 1px solid rgba(248, 113, 113, 0.22); color: #fca5a5; }
+        .demo-texto.mascarado { background: var(--primary-soft); border: 1px solid var(--primary-border); color: #a7f3d0; }
+        .demo-texto mark { background: none; color: inherit; font-weight: 800; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+        .demo-rodape { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); }
+        .demo-rodape i { color: var(--primary); }
+
+        .privacidade-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 22px; margin-bottom: 56px; }
+        .privacidade-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 28px 24px; }
+        .privacidade-card .num { font-size: 12px; font-weight: 800; color: var(--primary); letter-spacing: .08em; margin-bottom: 12px; }
+        .privacidade-card h3 { font-size: 16.5px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .privacidade-card h3 i { color: var(--primary); font-size: 17px; }
+        .privacidade-card p { color: var(--text-muted); font-size: 13.8px; }
+
+        /* Fluxo de processamento */
+        .fluxo { display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 56px; }
+        .fluxo-passo { flex: 1 1 190px; max-width: 230px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 16px; text-align: center; }
+        .fluxo-passo .icone { width: 42px; height: 42px; border-radius: 10px; background: var(--primary-soft); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 17px; margin: 0 auto 12px; }
+        .fluxo-passo h4 { font-size: 13.5px; font-weight: 700; margin-bottom: 6px; }
+        .fluxo-passo p { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+        .fluxo-seta { display: flex; align-items: center; justify-content: center; color: var(--text-fraco); font-size: 16px; flex: 0 0 auto; padding: 0 2px; }
+        @media (max-width: 760px) { .fluxo-seta { transform: rotate(90deg); } }
+
+        /* Chips de regras de PII */
+        .chips-pii { display: flex; flex-wrap: wrap; gap: 9px; justify-content: center; }
+        .chip-pii { display: inline-flex; align-items: center; gap: 7px; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); font-size: 12.5px; font-weight: 600; padding: 8px 14px; border-radius: 999px; }
+        .chip-pii i { color: var(--primary); font-size: 12px; }
+
+        /* ===================== Planos ===================== */
+        .plans-tabs { display: flex; justify-content: center; margin-bottom: 44px; }
+        .plans-wrap { position: relative; }
+        .plans-grid { display: none; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 26px; max-width: 940px; margin: 0 auto; }
+        .plans-grid.ativo { display: grid; animation: fadeIn .25s ease-out; }
+        .plans-grid.pessoal { max-width: 420px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .plan-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 36px 30px; display: flex; flex-direction: column; position: relative; }
+        .plan-card.destaque { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary-border), var(--shadow); }
+        .plan-tag { position: absolute; top: 18px; right: 18px; background-color: var(--primary); color: #052e21; font-size: 10.5px; font-weight: 800; letter-spacing: .03em; padding: 4px 11px; border-radius: 20px; text-transform: uppercase; }
+        .plan-name { font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--primary); margin-bottom: 10px; }
+        .plan-desc { color: var(--text-muted); font-size: 13.5px; margin-bottom: 18px; }
+        .plan-price { font-size: 38px; font-weight: 800; margin-bottom: 4px; display: flex; align-items: baseline; gap: 6px; letter-spacing: -.01em; }
+        .plan-price span { font-size: 13.5px; color: var(--text-muted); font-weight: 500; }
+        .plan-features { list-style: none; margin: 26px 0; display: flex; flex-direction: column; gap: 13px; flex: 1; }
+        .plan-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 13.8px; }
+        .plan-features li i { color: var(--primary); margin-top: 2px; }
+        .plan-features li.indisponivel { color: var(--text-fraco); text-decoration: line-through; }
+        .plan-features li.indisponivel i { color: var(--text-fraco); }
+
+        /* ===================== Área do cliente (links rápidos) ===================== */
+        .area-cliente { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .area-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 26px 24px;
+            display: flex; flex-direction: column; gap: 12px; transition: border-color .18s, transform .18s;
+        }
+        .area-card:hover { border-color: var(--primary-border); transform: translateY(-3px); }
+        .area-card .icone-linha { width: 44px; height: 44px; border-radius: 10px; background: var(--primary-soft); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .area-card h3 { font-size: 16px; font-weight: 700; }
+        .area-card p { font-size: 13.5px; color: var(--text-muted); flex: 1; }
+        .area-card .ir { font-size: 13px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 6px; }
+
+        /* ===================== Footer ===================== */
+        footer { border-top: 1px solid var(--border); padding: 48px 20px 34px; margin-top: 40px; }
+        .footer-grid { max-width: 1180px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 30px; margin-bottom: 30px; }
+        .footer-col h4 { font-size: 13px; font-weight: 700; margin-bottom: 14px; color: var(--text-main); }
+        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+        .footer-col ul a { font-size: 13.5px; color: var(--text-muted); }
+        .footer-col ul a:hover { color: var(--primary); }
+        .footer-selo { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-muted); }
+        .footer-selo i { color: var(--primary); }
+        .footer-base { max-width: 1180px; margin: 0 auto; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text-fraco); }
+
+        /* ===================== Webchat flutuante ===================== */
         .chat-widget { position: fixed; bottom: 30px; right: 30px; z-index: 1000; }
-        .chat-trigger { width: 60px; height: 60px; background-color: var(--primary); color: #0f172a; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); border: none; transition: transform 0.2s; }
+        .chat-trigger { width: 60px; height: 60px; background-color: var(--primary); color: #052e21; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 18px rgba(16, 185, 129, 0.45); border: none; transition: transform 0.2s; }
         .chat-trigger:hover { transform: scale(1.08); }
-        .chat-container { width: 380px; height: 500px; background-color: #1e293b; border: 1px solid var(--border); border-radius: 12px; display: none; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: absolute; bottom: 80px; right: 0; animation: slideUp 0.3s ease-out; }
+        .chat-container { width: 380px; height: 520px; background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; display: none; flex-direction: column; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.55); position: absolute; bottom: 80px; right: 0; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .chat-header { background-color: #0f172a; border-bottom: 1px solid var(--border); padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .chat-header { background-color: var(--bg-darker); border-bottom: 1px solid var(--border); padding: 15px 16px; display: flex; justify-content: space-between; align-items: center; }
         .chat-bot-info { display: flex; align-items: center; gap: 10px; }
-        .chat-bot-avatar { width: 32px; height: 32px; background-color: var(--primary); color: #0f172a; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; }
-        .chat-bot-info h4 { font-size: 14px; font-weight: 600; }
+        .chat-bot-avatar { width: 34px; height: 34px; background-color: var(--primary); color: #052e21; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; }
+        .chat-bot-info h4 { font-size: 14px; font-weight: 700; }
         .chat-bot-info span { font-size: 11px; color: var(--primary); display: block; }
         .chat-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; }
         .chat-close:hover { color: white; }
-        .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background-color: #0f172a; }
+        .chat-body { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 11px; background-color: var(--bg-darker); }
         .chat-row { display: flex; width: 100%; }
         .chat-row.user { justify-content: flex-end; }
         .chat-row.bot { justify-content: flex-start; }
-        .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 8px; font-size: 13.5px; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap; }
-        .chat-bubble.user { background-color: var(--primary); color: #0f172a; border-top-right-radius: 0; font-weight: 500; }
-        .chat-bubble.bot { background-color: #1e293b; color: var(--text-main); border-top-left-radius: 0; }
+        .chat-bubble { max-width: 82%; padding: 10px 14px; border-radius: 10px; font-size: 13.5px; line-height: 1.5; word-wrap: break-word; white-space: pre-wrap; }
+        .chat-bubble.user { background-color: var(--primary); color: #052e21; border-top-right-radius: 2px; font-weight: 500; }
+        .chat-bubble.bot { background-color: var(--bg-card); color: var(--text-main); border-top-left-radius: 2px; border: 1px solid var(--border); }
         .chat-bubble strong { font-weight: bold; }
-        .chat-bubble.error { background-color: #3f1d24; color: #f87171; border: 1px solid #7f1d1d; }
+        .chat-bubble.error { background-color: rgba(248, 113, 113, 0.12); color: #fca5a5; border: 1px solid rgba(248, 113, 113, 0.35); }
+        .chat-quick { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 12px; }
+        .chat-quick button { font-family: inherit; font-size: 11.5px; font-weight: 600; color: var(--primary); background: var(--primary-soft); border: 1px solid var(--primary-border); padding: 6px 11px; border-radius: 999px; cursor: pointer; }
+        .chat-quick button:hover { background: rgba(16,185,129,.22); }
         .typing-indicator { display: flex; gap: 4px; padding: 4px 8px; align-items: center; }
         .typing-indicator span { width: 6px; height: 6px; background-color: var(--text-muted); border-radius: 50%; display: inline-block; animation: bounce 1.3s infinite ease-in-out; }
         .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
         .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
-        .chat-footer { padding: 12px; background-color: #1e293b; border-top: 1px solid var(--border); display: flex; gap: 10px; }
-        .chat-input { flex: 1; border: 1px solid var(--border); background-color: #0f172a; padding: 8px 12px; border-radius: 6px; outline: none; font-size: 13.5px; color: var(--text-main); }
+        .chat-footer { padding: 12px; background-color: var(--bg-card); border-top: 1px solid var(--border); display: flex; gap: 10px; }
+        .chat-input { flex: 1; border: 1px solid var(--border); background-color: var(--bg-darker); padding: 9px 12px; border-radius: 8px; outline: none; font-size: 13.5px; color: var(--text-main); }
         .chat-input:focus { border-color: var(--primary); }
-        .chat-send-btn { background-color: var(--primary); border: none; color: #0f172a; width: 35px; height: 35px; border-radius: 6px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 14px; transition: background-color 0.2s; }
+        .chat-send-btn { background-color: var(--primary); border: none; color: #052e21; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 14px; transition: background-color 0.2s; flex-shrink: 0; }
         .chat-send-btn:hover { background-color: var(--primary-hover); }
+
         @media (max-width: 768px) {
             .nav-links { display: none; }
-            .hero h1 { font-size: 32px; }
-            .hero p { font-size: 15px; }
-            .chat-container { width: 320px; height: 420px; right: -10px; }
+            .hero { padding-top: 150px; }
+            .hero h1 { font-size: 30px; }
+            .hero p.subtitulo { font-size: 15px; }
+            section { padding: 68px 20px; }
+            .chat-container { width: 320px; height: 440px; right: -10px; }
         }
     </style>
 </head>
 <body>
-    <!-- Header/Navbar -->
+    <!-- ===================== Header / Navbar ===================== -->
     <header>
         <div class="nav-container">
             <div class="logo">
@@ -105,112 +259,403 @@
                 <span>PhishGuard</span>
             </div>
             <ul class="nav-links">
-                <li><a href="#produto">Produto</a></li>
+                <li><a href="#canais">Como funciona</a></li>
+                <li><a href="#privacidade">Privacidade</a></li>
                 <li><a href="#planos">Planos</a></li>
-                <li><a href="#contato" onclick="toggleChat(); return false;">Atendimento</a></li>
+                <li><a href="#area-cliente">Área do cliente</a></li>
             </ul>
+            <div class="nav-cta">
+                <button class="btn btn-outline btn-sm" onclick="toggleChat()"><i class="fa-solid fa-comments"></i> Atendimento</button>
+            </div>
         </div>
     </header>
 
-    <!-- Hero Section -->
+    <!-- ===================== Hero ===================== -->
     <section class="hero" id="produto">
-        <h1>Segurança Invisível. Proteção Invencível.</h1>
-        <p>A primeira linha de defesa inteligente do mercado B2B. Protegemos os colaboradores da sua empresa contra phishing e engenharia social em tempo real, integrando extensão corporativa, bot de WhatsApp e SOC conversacional em um único ecossistema unificado.</p>
-        <button class="btn" onclick="toggleChat()"><i class="fa-solid fa-comments"></i> Falar com Especialista</button>
-        <button class="btn btn-outline" onclick="document.getElementById('planos').scrollIntoView({behavior: 'smooth'})">Ver Planos B2B</button>
+        <div class="toggle-publico grande" role="tablist" aria-label="Escolher perfil de uso">
+            <button type="button" data-publico="B2C" class="js-toggle-publico" role="tab"><i class="fa-solid fa-house-user"></i> Pessoal</button>
+            <button type="button" data-publico="B2B" class="js-toggle-publico" role="tab"><i class="fa-solid fa-building-shield"></i> Empresas</button>
+        </div>
+
+        <div data-conteudo-publico="B2C">
+            <h1>Sua caixa de entrada, <span class="marca-degrade">protegida sem abrir mão da sua privacidade</span></h1>
+            <p class="subtitulo">O PhishGuard analisa seus e-mails e mensagens no Gmail, Outlook e WhatsApp em tempo real — com uma arquitetura de <strong style="color:var(--text-main)">Retenção Zero</strong> que nunca guarda o conteúdo do que você escreve ou recebe.</p>
+            <div class="hero-ctas">
+                <button class="btn" onclick="document.getElementById('planos').scrollIntoView({behavior:'smooth'})"><i class="fa-solid fa-shield-heart"></i> Proteger meu e-mail</button>
+                <button class="btn btn-outline" onclick="document.getElementById('privacidade').scrollIntoView({behavior:'smooth'})">Ver como protegemos seus dados</button>
+            </div>
+        </div>
+
+        <div data-conteudo-publico="B2B" hidden>
+            <h1>Governança de phishing para <span class="marca-degrade">toda a sua organização</span></h1>
+            <p class="subtitulo">Extensão corporativa, Hub Conversacional e Painel SOC unificados — com visibilidade total sobre a exposição da equipe e retenção zero de conteúdo, sem violar a privacidade dos colaboradores.</p>
+            <div class="hero-ctas">
+                <button class="btn" onclick="toggleChat('Quero saber mais sobre o Plano Enterprise')"><i class="fa-solid fa-comments"></i> Falar com Especialista</button>
+                <button class="btn btn-outline" onclick="document.getElementById('planos').scrollIntoView({behavior:'smooth'})">Ver Planos Corporativos</button>
+            </div>
+        </div>
+
+        <div class="selo-tira">
+            <div class="selo-item"><i class="fa-solid fa-lock"></i> <strong>Retenção Zero</strong>&nbsp;de conteúdo</div>
+            <div class="selo-item"><i class="fa-solid fa-user-shield"></i> PII mascarada <strong>antes</strong> da IA</div>
+            <div class="selo-item"><i class="fa-solid fa-brain"></i> Dupla checagem <strong>estatística + IA</strong></div>
+            <div class="selo-item"><i class="fa-solid fa-scale-balanced"></i> Conformidade <strong>LGPD</strong></div>
+        </div>
     </section>
 
-    <!-- Hub Conversacional Channel Section -->
-    <section>
+    <!-- ===================== Hub Conversacional / Canais ===================== -->
+    <section id="canais">
         <div class="section-title">
-            <h2>O Hub Conversacional</h2>
-            <p>Três canais integrados de forma transparente para mitigar golpes corporativos de Dia-Zero.</p>
+            <span class="eyebrow"><i class="fa-solid fa-tower-broadcast"></i> Hub Conversacional</span>
+            <h2>Três canais, uma única inteligência</h2>
+            <p>A mesma engenharia de detecção acompanha você onde a ameaça chegar — na caixa de entrada, no WhatsApp ou em uma dúvida rápida pelo chat.</p>
         </div>
         <div class="hub-grid">
             <div class="card">
                 <div class="card-icon"><i class="fa-solid fa-desktop"></i></div>
-                <h3>1. Extensão Desktop</h3>
-                <p>Análise passiva e contínua direto na caixa de entrada do e-mail corporativo (Outlook, Gmail e OWA), identificando ameaças antes que o usuário clique.</p>
+                <h3>Extensão de E-mail</h3>
+                <p>Analisa Gmail, Outlook Web e Outlook 365 em tempo real, direto na tela de leitura — identificando ameaças antes de você clicar em qualquer link.</p>
+                <span class="card-tag">Personal &amp; Enterprise</span>
             </div>
             <div class="card">
                 <div class="card-icon"><i class="fa-brands fa-whatsapp"></i></div>
-                <h3>2. Bot de WhatsApp</h3>
-                <p>Análise ativa sob demanda direto no celular do colaborador. Ele encaminha links ou textos e a nossa inteligência responde em formato amigável no chat.</p>
+                <h3>Bot de WhatsApp</h3>
+                <p>Encaminhe um link ou texto suspeito e receba uma análise em linguagem simples, sem precisar sair da conversa.</p>
+                <span class="card-tag">Personal &amp; Enterprise</span>
             </div>
             <div class="card">
                 <div class="card-icon"><i class="fa-solid fa-headset"></i></div>
-                <h3>3. Webchat SOC</h3>
-                <p>Análise interativa e suporte comercial integrado diretamente no site. Um assistente virtual híbrido que protege e treina sua equipe continuamente.</p>
+                <h3>Webchat Híbrido</h3>
+                <p>Um assistente virtual que responde dúvidas comerciais e analisa riscos — o mesmo widget que você está vendo no canto desta página.</p>
+                <span class="card-tag">Personal &amp; Enterprise</span>
             </div>
         </div>
     </section>
-    <!-- Plans Section -->
+
+    <!-- ===================== Retenção Zero / Privacidade (diferencial competitivo) ===================== -->
+    <section id="privacidade" class="secao-alt">
+        <div class="privacidade-intro">
+            <div>
+                <span class="eyebrow"><i class="fa-solid fa-shield-halved"></i> Arquitetura de privacidade</span>
+                <h2>O que você escreve nunca fica guardado</h2>
+                <p>A maioria das ferramentas de segurança pede que você confie na política de privacidade delas. O PhishGuard prefere que essa garantia esteja <strong>no próprio código</strong>: o corpo do seu e-mail e as mensagens do hub existem apenas na memória do servidor, pelo tempo da análise — e são descartados assim que a resposta é enviada.</p>
+                <p>Antes de qualquer texto ser enviado à Inteligência Artificial, um mecanismo local de <strong>mascaramento de PII</strong> substitui CPF, cartões, chaves Pix, senhas e outros dados sensíveis por marcadores genéricos. A IA analisa o risco — não a sua identidade.</p>
+                <p>Isso significa que, mesmo se alguém tivesse acesso ao nosso banco de dados, não encontraria uma única mensagem sua: apenas metadados agregados, como canal, data e o veredito de segurança.</p>
+            </div>
+
+            <div class="demo-mascaramento" aria-label="Exemplo de mascaramento de dados pessoais antes do envio à IA">
+                <div class="demo-topo">
+                    <span class="ponto" style="background:#f87171"></span>
+                    <span class="ponto" style="background:#fbbf24"></span>
+                    <span class="ponto" style="background:#10b981"></span>
+                    <span class="rotulo">mascaramento_pii.py — pré-visualização</span>
+                </div>
+                <div class="demo-corpo">
+                    <div class="demo-linha">Texto original (nunca sai do processo)</div>
+                    <div class="demo-texto original">"Confirme seu CPF <mark>111.444.777-35</mark> e a senha <mark>Abc12345</mark> para liberar o saque via Pix."</div>
+
+                    <div class="demo-linha">Texto enviado à IA (Camada 2)</div>
+                    <div class="demo-texto mascarado">"Confirme seu CPF <mark>[CPF_MASCARADO]</mark> e a senha <mark>[CREDENCIAL_MASCARADA]</mark> para liberar o saque via Pix."</div>
+                </div>
+                <div class="demo-rodape"><i class="fa-solid fa-circle-check"></i> O domínio do remetente é preservado de propósito — é o que permite detectar phishing.</div>
+            </div>
+        </div>
+
+        <!-- Fluxo de processamento -->
+        <div class="fluxo">
+            <div class="fluxo-passo">
+                <div class="icone"><i class="fa-solid fa-envelope-open-text"></i></div>
+                <h4>1. Leitura local</h4>
+                <p>A extensão lê o e-mail no seu navegador. Nada sai daí ainda.</p>
+            </div>
+            <div class="fluxo-seta"><i class="fa-solid fa-arrow-right"></i></div>
+            <div class="fluxo-passo">
+                <div class="icone"><i class="fa-solid fa-user-shield"></i></div>
+                <h4>2. Mascaramento</h4>
+                <p>Dados pessoais são substituídos por marcadores antes de qualquer envio.</p>
+            </div>
+            <div class="fluxo-seta"><i class="fa-solid fa-arrow-right"></i></div>
+            <div class="fluxo-passo">
+                <div class="icone"><i class="fa-solid fa-brain"></i></div>
+                <h4>3. Análise por IA</h4>
+                <p>O modelo avalia o risco sobre o texto já anonimizado.</p>
+            </div>
+            <div class="fluxo-seta"><i class="fa-solid fa-arrow-right"></i></div>
+            <div class="fluxo-passo">
+                <div class="icone"><i class="fa-solid fa-trash-can"></i></div>
+                <h4>4. Descarte</h4>
+                <p>A resposta é enviada a você. O conteúdo é descartado da memória.</p>
+            </div>
+        </div>
+
+        <div class="privacidade-grid">
+            <div class="privacidade-card">
+                <div class="num">01 · RETENÇÃO ZERO</div>
+                <h3><i class="fa-solid fa-database"></i> Nada em disco</h3>
+                <p>O corpo do e-mail e as mensagens do hub jamais são gravados em banco de dados. Persistimos apenas metadados agregados: canal, data/hora, veredito e score de risco.</p>
+            </div>
+            <div class="privacidade-card">
+                <div class="num">02 · PII MASKING</div>
+                <h3><i class="fa-solid fa-eye-slash"></i> Anonimização preventiva</h3>
+                <p>Treze categorias de dados sensíveis são identificadas e mascaradas por regras locais antes de qualquer envio à IA generativa — inclusive validação real de CPF e de cartão pelo algoritmo de Luhn.</p>
+            </div>
+            <div class="privacidade-card">
+                <div class="num">03 · PSEUDONIMIZAÇÃO</div>
+                <h3><i class="fa-solid fa-fingerprint"></i> Identidade protegida</h3>
+                <p>Sua conta é identificada por um hash criptográfico irreversível (HMAC-SHA256), nunca pelo seu e-mail em texto claro — nem mesmo nos painéis internos da equipe.</p>
+            </div>
+            <div class="privacidade-card">
+                <div class="num">04 · SEUS DIREITOS</div>
+                <h3><i class="fa-solid fa-scale-balanced"></i> Controle total (LGPD)</h3>
+                <p>Você pode solicitar a eliminação dos seus metadados a qualquer momento. Como o conteúdo nunca foi armazenado, esse direito já nasce atendido.</p>
+            </div>
+        </div>
+
+        <div class="section-title" style="margin-bottom: 26px;">
+            <p style="font-size:13.5px; text-transform:uppercase; letter-spacing:.06em; font-weight:700; color:var(--text-fraco);">Categorias de dados mascaradas automaticamente</p>
+        </div>
+        <div class="chips-pii">
+            <span class="chip-pii"><i class="fa-solid fa-check"></i> CPF</span>
+            <span class="chip-pii"><i class="fa-solid fa-check"></i> CNPJ</span>
+            <span class="chip-pii"><i class="fa-solid fa-check"></i> Cartão de crédito (Luhn)</span>
+            <span class="chip-pii"><i class="fa-solid fa-check"></i> Chave Pix</span>
+            <span class="chip-pii"><i class="fa-solid fa-check"></i> Dados bancários</span>
+            <span class="chip-pii"><i class="fa-solid fa-check"></i> Telefone</span>
+            <span class="chip-pii"><i class="fa-solid fa-check"></i> CEP</span>
+            <span class="chip-pii"><i class="fa-solid fa-check"></i> Senhas e credenciais</span>
+            <span class="chip-pii"><i class="fa-solid fa-check"></i> Documentos (RG/CNH)</span>
+        </div>
+    </section>
+
+    <!-- ===================== Planos ===================== -->
     <section id="planos">
         <div class="section-title">
-            <h2>Nossos Planos Corporativos (SaaS)</h2>
-            <p>Escolha o nível ideal de proteção e inteligência conversacional para sua empresa.</p>
+            <span class="eyebrow"><i class="fa-solid fa-tags"></i> Planos</span>
+            <h2 id="planos-titulo">Proteção sob medida para você</h2>
+            <p id="planos-subtitulo">Escolha o plano ideal — a mesma tecnologia de detecção, adaptada ao seu perfil.</p>
         </div>
-        <div class="plans-grid">
-            <div class="plan-card">
-                <div class="plan-name">Plano Starter</div>
-                <div class="plan-price">R$ 15 <span>/ colaborador / mês</span></div>
-                <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 10px;">Ideal para pequenas equipes que buscam proteção essencial de e-mails.</p>
-                <ul class="plan-features">
-                    <li><i class="fa-solid fa-circle-check"></i> Extensão Desktop para E-mails</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Motor de ML Estatístico</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Análise Passiva da Caixa de Entrada</li>
-                    <li style="color: var(--text-muted); text-decoration: line-through;"><i class="fa-solid fa-circle-xmark" style="color: var(--text-muted);"></i> IA Generativa Gemini</li>
-                    <li style="color: var(--text-muted); text-decoration: line-through;"><i class="fa-solid fa-circle-xmark" style="color: var(--text-muted);"></i> Integração WhatsApp Bot</li>
-                </ul>
-                <button class="btn btn-outline" style="margin: 0; width: 100%;" onclick="toggleChat('Quero assinar o Plano Starter')">Contratar Starter</button>
+
+        <div class="plans-tabs">
+            <div class="toggle-publico" role="tablist" aria-label="Escolher planos">
+                <button type="button" data-publico="B2C" class="js-toggle-publico"><i class="fa-solid fa-house-user"></i> Pessoal</button>
+                <button type="button" data-publico="B2B" class="js-toggle-publico"><i class="fa-solid fa-building-shield"></i> Empresas</button>
             </div>
-            <div class="plan-card enterprise">
-                <div class="plan-tag">RECOMENDADO</div>
-                <div class="plan-name">Plano Enterprise</div>
-                <div class="plan-price">R$ 25 <span>/ colaborador / mês</span></div>
-                <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 10px;">Proteção corporativa completa com IA Generativa, governança e Hub multi-canal.</p>
-                <ul class="plan-features">
-                    <li><i class="fa-solid fa-circle-check"></i> Extensão Desktop para E-mails</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Motor de ML Estatístico</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Dupla Checagem com IA Gemini</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Hub de WhatsApp Ativo 24/7</li>
-                    <li><i class="fa-solid fa-circle-check"></i> Painel SOC de Governança B2B</li>
-                </ul>
-                <button class="btn" style="margin: 0; width: 100%;" onclick="toggleChat('Quero saber mais sobre o Plano Enterprise')">Contratar Enterprise</button>
+        </div>
+
+        <div class="plans-wrap">
+            <!-- Plano Personal (B2C) -->
+            <div class="plans-grid pessoal" data-plano-publico="B2C">
+                <div class="plan-card destaque">
+                    <div class="plan-tag">Para você e sua família</div>
+                    <div class="plan-name">PhishGuard Personal</div>
+                    <div class="plan-price">R$ 9,90 <span>/ mês</span></div>
+                    <p class="plan-desc">Proteção individual completa para o seu e-mail e o seu WhatsApp, com a mesma dupla checagem por IA usada nas empresas.</p>
+                    <ul class="plan-features">
+                        <li><i class="fa-solid fa-circle-check"></i> Extensão para Gmail e Outlook</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Análise ilimitada de e-mails</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Dupla checagem com IA Gemini</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Bot de checagem no WhatsApp</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Painel pessoal de proteção</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Arquitetura de Retenção Zero</li>
+                    </ul>
+                    <button class="btn" style="margin: 0; width: 100%;" onclick="toggleChat('Quero assinar o PhishGuard Personal')">Assinar Personal</button>
+                </div>
+            </div>
+
+            <!-- Planos Enterprise (B2B) -->
+            <div class="plans-grid" data-plano-publico="B2B">
+                <div class="plan-card">
+                    <div class="plan-name">Starter</div>
+                    <div class="plan-price">R$ 15 <span>/ colaborador / mês</span></div>
+                    <p class="plan-desc">Ideal para pequenas equipes que buscam proteção essencial de e-mails.</p>
+                    <ul class="plan-features">
+                        <li><i class="fa-solid fa-circle-check"></i> Extensão Desktop para E-mails</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Motor de ML Estatístico (Camada 1)</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Análise passiva da caixa de entrada</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Arquitetura de Retenção Zero</li>
+                        <li class="indisponivel"><i class="fa-solid fa-circle-xmark"></i> IA Generativa Gemini</li>
+                        <li class="indisponivel"><i class="fa-solid fa-circle-xmark"></i> Hub de WhatsApp</li>
+                        <li class="indisponivel"><i class="fa-solid fa-circle-xmark"></i> Painel SOC de Governança</li>
+                    </ul>
+                    <button class="btn btn-outline" style="margin: 0; width: 100%;" onclick="toggleChat('Quero assinar o Plano Starter')">Contratar Starter</button>
+                </div>
+                <div class="plan-card destaque">
+                    <div class="plan-tag">Recomendado</div>
+                    <div class="plan-name">Enterprise</div>
+                    <div class="plan-price">R$ 25 <span>/ colaborador / mês</span></div>
+                    <p class="plan-desc">Proteção corporativa completa com IA Generativa, governança e Hub multicanal.</p>
+                    <ul class="plan-features">
+                        <li><i class="fa-solid fa-circle-check"></i> Extensão Desktop para E-mails</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Motor de ML Estatístico (Camada 1)</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Dupla checagem com IA Gemini (Camada 2)</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Hub de WhatsApp ativo 24/7</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Painel SOC de Governança B2B</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Colaboradores identificados por pseudônimo</li>
+                    </ul>
+                    <button class="btn" style="margin: 0; width: 100%;" onclick="toggleChat('Quero saber mais sobre o Plano Enterprise')">Contratar Enterprise</button>
+                </div>
             </div>
         </div>
     </section>
-    <!-- Floating Webchat Widget -->
+
+    <!-- ===================== Área do cliente ===================== -->
+    <section id="area-cliente" class="secao-alt">
+        <div class="section-title">
+            <span class="eyebrow"><i class="fa-solid fa-arrow-up-right-from-square"></i> Já é cliente?</span>
+            <h2>Acesse o seu painel</h2>
+            <p>Cada linha de produto tem uma experiência dedicada — pessoal e discreta, ou corporativa e orientada a governança.</p>
+        </div>
+        <div class="area-cliente">
+            <a class="area-card" href="../painel_pessoal/index.html">
+                <div class="icone-linha"><i class="fa-solid fa-house-user"></i></div>
+                <h3>Painel Personal</h3>
+                <p>Veja quantas ameaças foram bloqueadas para você, seu histórico de proteção e o selo de privacidade da sua conta.</p>
+                <span class="ir">Abrir painel pessoal <i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+            <a class="area-card" href="../painel_soc/index.html">
+                <div class="icone-linha"><i class="fa-solid fa-building-shield"></i></div>
+                <h3>Painel SOC Enterprise</h3>
+                <p>Governança completa: domínios sob risco, exposição de colaboradores por pseudônimo e trilha de auditoria anonimizada.</p>
+                <span class="ir">Abrir painel corporativo <i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+            <a class="area-card" href="../hub_conversacional/simulador_whatsapp.html">
+                <div class="icone-linha"><i class="fa-brands fa-whatsapp"></i></div>
+                <h3>Simulador de WhatsApp</h3>
+                <p>Teste o bot de checagem do PhishGuard exatamente como ele funciona dentro do WhatsApp.</p>
+                <span class="ir">Testar o bot <i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ===================== Footer ===================== -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col" style="max-width:280px;">
+                <div class="logo" style="margin-bottom:14px;">
+                    <img src="../assets/logo.png" alt="PhishGuard" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3551/3551571.png'">
+                    <span>PhishGuard</span>
+                </div>
+                <p style="font-size:13.5px; color:var(--text-muted); line-height:1.6;">SECaaS híbrido com proteção individual (Personal) e governança corporativa (Enterprise), construído sobre uma arquitetura de Retenção Zero.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Produto</h4>
+                <ul>
+                    <li><a href="#canais">Como funciona</a></li>
+                    <li><a href="#privacidade">Privacidade e LGPD</a></li>
+                    <li><a href="#planos">Planos e preços</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Área do cliente</h4>
+                <ul>
+                    <li><a href="../painel_pessoal/index.html">Painel Personal</a></li>
+                    <li><a href="../painel_soc/index.html">Painel SOC Enterprise</a></li>
+                    <li><a href="../hub_conversacional/simulador_whatsapp.html">Simulador WhatsApp</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Confiança</h4>
+                <div class="footer-selo"><i class="fa-solid fa-lock"></i> Retenção Zero de conteúdo</div>
+                <div class="footer-selo" style="margin-top:9px;"><i class="fa-solid fa-user-shield"></i> PII mascarada antes da IA</div>
+                <div class="footer-selo" style="margin-top:9px;"><i class="fa-solid fa-scale-balanced"></i> Conformidade com a LGPD</div>
+            </div>
+        </div>
+        <div class="footer-base">
+            <span>PhishGuard — SECaaS híbrido Personal &amp; Enterprise.</span>
+            <span>Conformidade com a Lei 13.709/2018 (LGPD). Consulte a política em <code>GET /api/privacidade</code>.</span>
+        </div>
+    </footer>
+
+    <!-- ===================== Webchat flutuante ===================== -->
     <div class="chat-widget">
-        <button class="chat-trigger" onclick="toggleChat()"><i class="fa-solid fa-comments"></i></button>
+        <button class="chat-trigger" onclick="toggleChat()" aria-label="Abrir atendimento"><i class="fa-solid fa-comments"></i></button>
         <div class="chat-container" id="chatContainer">
             <div class="chat-header">
                 <div class="chat-bot-info">
                     <div class="chat-bot-avatar"><i class="fa-solid fa-shield-halved"></i></div>
                     <div>
                         <h4>PhishGuard IA</h4>
-                        <span>Online • Especialista</span>
+                        <span>Online • Personal &amp; Enterprise</span>
                     </div>
                 </div>
-                <button class="chat-close" onclick="toggleChat()"><i class="fa-solid fa-xmark"></i></button>
+                <button class="chat-close" onclick="toggleChat()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="chat-body" id="chatBody">
                 <div class="chat-row bot">
-                    <div class="chat-bubble bot">Olá! Sou a IA de Atendimento do 🛡️ <strong>PhishGuard</strong>.<br><br>Como posso ajudar sua empresa hoje ou qual link suspeito deseja analisar?</div>
+                    <div class="chat-bubble bot">Olá! Sou a IA de atendimento do 🛡️ <strong>PhishGuard</strong>.<br><br>Posso falar sobre o plano <strong>Personal</strong> (uso pessoal), o <strong>Enterprise</strong> (empresas) ou analisar um link/texto suspeito que você recebeu. Nenhuma mensagem enviada aqui é armazenada.</div>
                 </div>
+            </div>
+            <div class="chat-quick" id="chatQuick">
+                <button type="button" data-msg="Quanto custa o plano pessoal?">Plano pessoal</button>
+                <button type="button" data-msg="Quanto custa para uma empresa?">Plano empresa</button>
+                <button type="button" data-msg="Como funciona a retenção zero?">Retenção zero</button>
             </div>
             <div class="chat-footer">
                 <input type="text" class="chat-input" id="chatInput" placeholder="Pergunte sobre os planos ou envie um link..." autocomplete="off">
-                <button class="chat-send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                <button class="chat-send-btn" onclick="sendMessage()" aria-label="Enviar"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
 
-    <!-- JS Logic -->
+    <!-- ===================== JS ===================== -->
     <script>
+        // -------------------------------------------------------------------
+        // Alternador de público (Pessoal / Empresas)
+        //
+        // O mesmo estado controla três coisas: o texto do hero, a aba ativa da
+        // seção de Planos e o perfil enviado ao webchat (campo `perfil`), para
+        // que a experiência inteira da página reaja de forma coerente à
+        // escolha do visitante.
+        // -------------------------------------------------------------------
+        const CHAVE_PERFIL = 'phishguard_perfil';
+        let publicoAtivo = localStorage.getItem(CHAVE_PERFIL) === 'B2B' ? 'B2B' : 'B2C';
+
+        const TITULOS_PLANOS = {
+            B2C: { titulo: 'Proteção sob medida para você', subtitulo: 'Um único plano completo, pensado para o seu dia a dia — sem letras miúdas.' },
+            B2B: { titulo: 'Planos corporativos (SaaS)', subtitulo: 'Escolha o nível ideal de proteção e inteligência conversacional para sua empresa.' },
+        };
+
+        function aplicarPublico(publico, opcoes = {}) {
+            publicoAtivo = publico === 'B2B' ? 'B2B' : 'B2C';
+            localStorage.setItem(CHAVE_PERFIL, publicoAtivo);
+
+            document.querySelectorAll('.js-toggle-publico').forEach((botao) => {
+                botao.classList.toggle('ativo', botao.dataset.publico === publicoAtivo);
+                botao.setAttribute('aria-selected', botao.dataset.publico === publicoAtivo ? 'true' : 'false');
+            });
+
+            document.querySelectorAll('[data-conteudo-publico]').forEach((bloco) => {
+                bloco.hidden = bloco.dataset.conteudoPublico !== publicoAtivo;
+            });
+
+            document.querySelectorAll('[data-plano-publico]').forEach((grade) => {
+                grade.classList.toggle('ativo', grade.dataset.planoPublico === publicoAtivo);
+            });
+
+            const textos = TITULOS_PLANOS[publicoAtivo];
+            document.getElementById('planos-titulo').textContent = textos.titulo;
+            document.getElementById('planos-subtitulo').textContent = textos.subtitulo;
+
+            if (!opcoes.silencioso) {
+                document.querySelectorAll('.js-toggle-publico').forEach((b) => {
+                    if (b.dataset.publico === publicoAtivo) b.blur();
+                });
+            }
+        }
+
+        document.querySelectorAll('.js-toggle-publico').forEach((botao) => {
+            botao.addEventListener('click', () => aplicarPublico(botao.dataset.publico));
+        });
+
+        aplicarPublico(publicoAtivo, { silencioso: true });
+
+        // -------------------------------------------------------------------
+        // Webchat híbrido
+        // -------------------------------------------------------------------
         const chatContainer = document.getElementById('chatContainer');
         const chatBody = document.getElementById('chatBody');
         const chatInput = document.getElementById('chatInput');
+        const chatQuick = document.getElementById('chatQuick');
 
         function toggleChat(initialText = null) {
             const isVisible = chatContainer.style.display === 'flex';
@@ -252,31 +697,61 @@
             return row;
         }
 
+        // Identidade pseudônima do visitante. O servidor recebe o valor apenas
+        // para derivar um HMAC irreversível — nunca o armazena em texto claro.
+        const CHAVE_CONTA = 'phishguard_id_conta';
+        let idConta = localStorage.getItem(CHAVE_CONTA);
+        if (!idConta) {
+            idConta = 'anon-' + (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36));
+            localStorage.setItem(CHAVE_CONTA, idConta);
+        }
+
         async function sendMessage() {
             const message = chatInput.value.trim();
             if (!message) return;
             chatInput.value = '';
+            if (chatQuick) chatQuick.style.display = 'none';
             appendMessage(message, true);
             const typing = appendTyping();
+
+            // Timeout no cliente para não deixar o indicador de digitação preso.
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 25000);
+
             try {
                 const response = await fetch('http://localhost:8000/webhook/webchat', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mensagem: message })
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                    body: JSON.stringify({ mensagem: message, perfil: publicoAtivo, id_conta: idConta }),
+                    signal: controller.signal
                 });
                 typing.remove();
-                if (!response.ok) throw new Error();
+                if (!response.ok) throw new Error(`A API respondeu HTTP ${response.status}.`);
                 const data = await response.json();
                 appendMessage(data.resposta, false);
             } catch (err) {
                 typing.remove();
-                appendMessage("🚨 *Erro de conexão:*\nNão foi possível obter resposta da IA do PhishGuard. Certifique-se de que o backend está rodando localmente (via `python api.py` na porta 8000).", false, true);
+                const motivo = err && err.name === 'AbortError'
+                    ? 'A análise demorou mais que o esperado.'
+                    : 'Não foi possível obter resposta da IA do PhishGuard.';
+                appendMessage(`🚨 *Erro de conexão:*\n${motivo} Certifique-se de que o backend está rodando localmente (via \`python api.py\` na porta 8000).`, false, true);
+            } finally {
+                clearTimeout(timer);
             }
         }
 
         chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
         });
+
+        if (chatQuick) {
+            chatQuick.querySelectorAll('button').forEach((botao) => {
+                botao.addEventListener('click', () => {
+                    chatInput.value = botao.dataset.msg;
+                    sendMessage();
+                });
+            });
+        }
     </script>
 </body>
 </html>

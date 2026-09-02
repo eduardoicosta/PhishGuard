@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PhishGuard Personal — Minha Proteção</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  /*
+    Vertente B2C. A identidade é deliberadamente diferente do Painel SOC:
+    claro, acolhedor e centrado em "o que a proteção fez por VOCÊ" — nada de
+    jargão de operações de segurança, nada de dados de outras pessoas.
+  */
+  :root {
+    --fundo: #f1f5f9;
+    --superficie: #ffffff;
+    --borda: #e2e8f0;
+    --texto: #0f172a;
+    --texto-secundario: #475569;
+    --texto-terciario: #94a3b8;
+    --marca: #0f766e;
+    --seguro: #10b981;
+    --critico: #dc2626;
+    --atencao: #f59e0b;
+    --info: #3b82f6;
+    --sombra: 0 1px 3px rgba(15, 23, 42, .07), 0 8px 24px rgba(15, 23, 42, .05);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--fundo); color: var(--texto); line-height: 1.6;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 32px 20px 48px;
+  }
+  .container { max-width: 1080px; margin: 0 auto; }
+
+  header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+  .escudo {
+    width: 46px; height: 46px; border-radius: 13px; background: var(--marca);
+    color: #fff; display: flex; align-items: center; justify-content: center; font-size: 21px;
+    flex-shrink: 0;
+  }
+  header h1 { font-size: 25px; font-weight: 800; letter-spacing: -.02em; }
+  header p { font-size: 14px; color: var(--texto-secundario); }
+  .plano {
+    margin-left: auto; display: flex; align-items: center; gap: 8px;
+    background: rgba(15,118,110,.09); color: var(--marca); border: 1px solid rgba(15,118,110,.22);
+    padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  }
+
+  .barra-conta {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: 14px;
+    padding: 16px 18px; margin: 22px 0 26px; box-shadow: var(--sombra);
+  }
+  .campo { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 240px; }
+  .campo label { font-size: 11.5px; font-weight: 700; color: var(--texto-terciario); text-transform: uppercase; letter-spacing: .05em; }
+  .campo input, .campo select {
+    border: 1px solid var(--borda); border-radius: 9px; padding: 9px 12px;
+    font-size: 14px; font-family: inherit; color: var(--texto); background: #fff;
+  }
+  .campo input:focus, .campo select:focus { outline: 2px solid rgba(15,118,110,.35); outline-offset: 1px; }
+  .campo.estreito { flex: 0 0 150px; min-width: 150px; }
+  button.principal {
+    background: var(--marca); color: #fff; border: none; border-radius: 9px;
+    padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 8px; font-family: inherit; height: 40px;
+  }
+  button.principal:hover { background: #115e59; }
+  .ajuda { font-size: 12px; color: var(--texto-terciario); flex-basis: 100%; margin-top: 2px; }
+
+  .cartoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 26px; }
+  .cartao {
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: 14px;
+    padding: 20px; box-shadow: var(--sombra); display: flex; gap: 15px; align-items: flex-start;
+  }
+  .cartao .icone { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .cartao.seguro .icone { background: rgba(16,185,129,.12); color: var(--seguro); }
+  .cartao.critico .icone { background: rgba(220,38,38,.10); color: var(--critico); }
+  .cartao.info .icone { background: rgba(59,130,246,.11); color: var(--info); }
+  .cartao.atencao .icone { background: rgba(245,158,11,.13); color: var(--atencao); }
+  .cartao h3 { font-size: 12.5px; font-weight: 700; color: var(--texto-terciario); text-transform: uppercase; letter-spacing: .05em; }
+  .cartao .numero { font-size: 30px; font-weight: 800; line-height: 1.15; letter-spacing: -.02em; }
+  .cartao .nota { font-size: 12.5px; color: var(--texto-secundario); }
+
+  /* stretch (padrão do grid) faz os dois painéis da linha terem a mesma altura;
+     'start' deixava o card lateral "flutuando" mais curto que o gráfico. */
+  .colunas { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; align-items: stretch; }
+  @media (max-width: 860px) { .colunas { grid-template-columns: 1fr; } }
+
+  .painel {
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: 14px;
+    box-shadow: var(--sombra); overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .colunas > .painel > *:last-child { flex: 1; }
+  .painel > h2 {
+    font-size: 15.5px; font-weight: 700; padding: 17px 20px; border-bottom: 1px solid var(--borda);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .painel > h2 i { color: var(--marca); }
+  .painel .corpo { padding: 18px 20px; }
+
+  /* Gráfico de barras diário, desenhado sem bibliotecas externas. */
+  .grafico { display: flex; align-items: flex-end; justify-content: center; gap: 6px; height: 168px; padding-top: 8px; }
+  /* max-width evita que um único dia vire um bloco gigante ocupando a linha toda. */
+  .coluna { flex: 1 1 0; max-width: 54px; display: flex; flex-direction: column; justify-content: flex-end; gap: 3px; min-width: 0; }
+  .coluna .pilha { display: flex; flex-direction: column-reverse; gap: 2px; }
+  .coluna .seg { background: var(--seguro); border-radius: 3px 3px 0 0; min-height: 2px; }
+  .coluna .ame { background: var(--critico); border-radius: 3px 3px 0 0; min-height: 2px; }
+  .coluna .dia { font-size: 10px; color: var(--texto-terciario); text-align: center; white-space: nowrap; overflow: hidden; }
+  .legenda { display: flex; gap: 18px; font-size: 12.5px; color: var(--texto-secundario); margin-top: 14px; }
+  .legenda i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 6px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { padding: 12px 20px; border-bottom: 1px solid var(--borda); text-align: left; }
+  th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-terciario); font-weight: 700; background: #f8fafc; }
+  tbody tr:last-child td { border-bottom: none; }
+  .etiqueta { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .etiqueta.ameaca { background: rgba(220,38,38,.10); color: #b91c1c; }
+  .etiqueta.segura { background: rgba(16,185,129,.12); color: #047857; }
+  .etiqueta.canal { background: #f1f5f9; color: var(--texto-secundario); }
+
+  .selo-lgpd {
+    display: flex; gap: 14px; align-items: flex-start; margin-top: 26px;
+    background: rgba(15,118,110,.06); border: 1px solid rgba(15,118,110,.2);
+    border-radius: 14px; padding: 18px 20px;
+  }
+  .selo-lgpd .cadeado { color: var(--marca); font-size: 19px; flex-shrink: 0; margin-top: 1px; }
+  .selo-lgpd strong { display: block; font-size: 14.5px; margin-bottom: 3px; }
+  .selo-lgpd p { font-size: 13px; color: var(--texto-secundario); }
+  .selo-lgpd ul { margin-top: 9px; padding-left: 18px; font-size: 12.5px; color: var(--texto-secundario); }
+  .selo-lgpd li { margin-bottom: 3px; }
+
+  .estado { padding: 26px 20px; text-align: center; color: var(--texto-terciario); font-size: 13.5px; }
+  .estado.erro { color: #b91c1c; }
+  footer { margin-top: 28px; text-align: center; font-size: 12px; color: var(--texto-terciario); line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="escudo"><i class="fa-solid fa-shield-halved"></i></div>
+    <div>
+      <h1>Minha Proteção</h1>
+      <p>PhishGuard Personal — o que a sua proteção fez por você</p>
+    </div>
+    <div class="plano"><i class="fa-solid fa-circle-check"></i> <span id="statusPlano">Plano Personal · ativo</span></div>
+  </header>
+
+  <section class="barra-conta">
+    <div class="campo">
+      <label for="idConta">Seu identificador (copie da extensão › aba Conta)</label>
+      <input type="text" id="idConta" placeholder="anon-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off">
+    </div>
+    <div class="campo estreito">
+      <label for="periodo">Período</label>
+      <select id="periodo">
+        <option value="7">7 dias</option>
+        <option value="30" selected>30 dias</option>
+        <option value="90">90 dias</option>
+      </select>
+    </div>
+    <button class="principal" id="btnCarregar"><i class="fa-solid fa-rotate"></i> Atualizar</button>
+    <p class="ajuda">
+      O identificador é um pseudônimo gerado no seu dispositivo. O PhishGuard usa
+      apenas o hash derivado dele — o seu e-mail nunca é armazenado.
+    </p>
+  </section>
+
+  <div class="cartoes">
+    <div class="cartao info">
+      <div class="icone"><i class="fa-solid fa-envelope-open-text"></i></div>
+      <div>
+        <h3>Mensagens analisadas</h3>
+        <div class="numero" id="mTotal">—</div>
+        <div class="nota" id="mTotalNota">no período selecionado</div>
+      </div>
+    </div>
+    <div class="cartao critico">
+      <div class="icone"><i class="fa-solid fa-shield-virus"></i></div>
+      <div>
+        <h3>Golpes bloqueados</h3>
+        <div class="numero" id="mAmeacas">—</div>
+        <div class="nota">ameaças que não chegaram até você</div>
+      </div>
+    </div>
+    <div class="cartao seguro">
+      <div class="icone"><i class="fa-solid fa-circle-check"></i></div>
+      <div>
+        <h3>Taxa de tranquilidade</h3>
+        <div class="numero" id="mTaxa">—</div>
+        <div class="nota">mensagens legítimas do período</div>
+      </div>
+    </div>
+    <div class="cartao atencao">
+      <div class="icone"><i class="fa-solid fa-user-shield"></i></div>
+      <div>
+        <h3>Dados anonimizados</h3>
+        <div class="numero" id="mMascarados">—</div>
+        <div class="nota">CPFs, cartões e senhas ocultados antes da IA</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="colunas">
+    <section class="painel">
+      <h2><i class="fa-solid fa-chart-column"></i> Sua proteção dia a dia</h2>
+      <div class="corpo">
+        <div class="grafico" id="grafico"></div>
+        <div class="legenda">
+          <span><i style="background:#10b981"></i>Mensagens seguras</span>
+          <span><i style="background:#dc2626"></i>Golpes bloqueados</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="painel">
+      <h2><i class="fa-solid fa-tower-broadcast"></i> Onde você é protegido</h2>
+      <div class="corpo" id="canais">
+        <div class="estado">Informe seu identificador para carregar os dados.</div>
+      </div>
+    </section>
+  </div>
+
+  <section class="painel" style="margin-top:18px">
+    <h2><i class="fa-solid fa-clock-rotate-left"></i> Histórico recente</h2>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr><th>Data / Hora</th><th>Canal</th><th>Resultado</th><th>Risco</th><th>Privacidade</th></tr>
+        </thead>
+        <tbody id="historico">
+          <tr><td colspan="5"><div class="estado">Nenhum dado carregado ainda.</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="selo-lgpd">
+    <i class="fa-solid fa-lock cadeado"></i>
+    <div>
+      <strong>Processamento em memória · Retenção zero de dados pessoais</strong>
+      <p id="resumoPrivacidade">
+        O conteúdo dos seus e-mails e mensagens é analisado apenas durante a
+        requisição e descartado em seguida. Nada aqui foi reconstruído a partir do
+        que você escreveu — estes números vêm somente de metadados agregados.
+      </p>
+      <ul id="listaGarantias"></ul>
+    </div>
+  </section>
+
+  <footer>
+    PhishGuard Personal · Conformidade com a LGPD (Lei 13.709/2018).<br>
+    Você pode solicitar a eliminação dos seus metadados a qualquer momento pela extensão › Privacidade.
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const API = localStorage.getItem("phishguard_api") || "http://localhost:8000";
+  const $ = (id) => document.getElementById(id);
+
+  const CHAVE_CONTA = "phishguard_id_conta";
+  $("idConta").value = localStorage.getItem(CHAVE_CONTA) || "";
+
+  function texto(elemento, valor) { elemento.textContent = valor; }
+
+  function formatarData(iso) {
+    try { return new Date(iso).toLocaleString("pt-BR"); }
+    catch (erro) { return String(iso || "—"); }
+  }
+
+  function estado(container, mensagem, tipoErro) {
+    container.innerHTML = "";
+    const div = document.createElement("div");
+    div.className = tipoErro ? "estado erro" : "estado";
+    div.textContent = mensagem;
+    container.appendChild(div);
+  }
+
+  function renderizarCartoes(dados) {
+    const resumo = dados.resumo || {};
+    texto($("mTotal"), resumo.total ?? 0);
+    texto($("mAmeacas"), resumo.ameacas ?? 0);
+    texto($("mTaxa"), `${resumo.taxa_protecao_percentual ?? 100}%`);
+    texto($("mMascarados"), resumo.pii_mascarados ?? 0);
+    texto($("mTotalNota"), `últimos ${dados.periodo_dias} dias`);
+    if (dados.assinatura) {
+      texto($("statusPlano"), `${dados.assinatura.plano} · ${dados.assinatura.status}`);
+    }
+  }
+
+  function renderizarGrafico(serie) {
+    const grafico = $("grafico");
+    grafico.innerHTML = "";
+    if (!serie || !serie.length) {
+      estado(grafico, "Sem atividade registrada no período.");
+      return;
+    }
+    const maximo = Math.max(...serie.map((d) => d.seguros + d.ameacas), 1);
+    const alturaMax = 132;
+
+    serie.slice(-21).forEach((dia) => {
+      const coluna = document.createElement("div");
+      coluna.className = "coluna";
+      coluna.title = `${dia.dia}: ${dia.seguros} segura(s), ${dia.ameacas} ameaça(s)`;
+
+      const pilha = document.createElement("div");
+      pilha.className = "pilha";
+      if (dia.seguros) {
+        const seg = document.createElement("div");
+        seg.className = "seg";
+        seg.style.height = `${Math.max((dia.seguros / maximo) * alturaMax, 3)}px`;
+        pilha.appendChild(seg);
+      }
+      if (dia.ameacas) {
+        const ame = document.createElement("div");
+        ame.className = "ame";
+        ame.style.height = `${Math.max((dia.ameacas / maximo) * alturaMax, 3)}px`;
+        pilha.appendChild(ame);
+      }
+      const rotulo = document.createElement("div");
+      rotulo.className = "dia";
+      rotulo.textContent = String(dia.dia).slice(8) + "/" + String(dia.dia).slice(5, 7);
+
+      coluna.appendChild(pilha);
+      coluna.appendChild(rotulo);
+      grafico.appendChild(coluna);
+    });
+  }
+
+  const NOMES_CANAL = { extensao: "E-mail (extensão)", whatsapp: "WhatsApp", webchat: "Webchat" };
+
+  function renderizarCanais(canais) {
+    const container = $("canais");
+    container.innerHTML = "";
+    if (!canais || !canais.length) {
+      estado(container, "Nenhum canal utilizado no período.");
+      return;
+    }
+    const total = canais.reduce((soma, c) => soma + c.total, 0) || 1;
+    canais.forEach((canal) => {
+      const linha = document.createElement("div");
+      linha.style.cssText = "margin-bottom:15px";
+
+      const topo = document.createElement("div");
+      topo.style.cssText = "display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:6px";
+      const nome = document.createElement("span");
+      nome.textContent = NOMES_CANAL[canal.canal] || canal.canal;
+      const valor = document.createElement("strong");
+      valor.textContent = `${canal.total} (${canal.ameacas} ameaça(s))`;
+      topo.appendChild(nome);
+      topo.appendChild(valor);
+
+      const trilho = document.createElement("div");
+      trilho.style.cssText = "height:8px;border-radius:999px;background:#e2e8f0;overflow:hidden";
+      const preenchido = document.createElement("div");
+      preenchido.style.cssText =
+        `height:100%;border-radius:999px;background:#0f766e;width:${Math.round((canal.total / total) * 100)}%`;
+      trilho.appendChild(preenchido);
+
+      linha.appendChild(topo);
+      linha.appendChild(trilho);
+      container.appendChild(linha);
+    });
+  }
+
+  function celula(linha, conteudo) {
+    const td = document.createElement("td");
+    if (typeof conteudo === "string") td.textContent = conteudo;
+    else td.appendChild(conteudo);
+    linha.appendChild(td);
+    return td;
+  }
+
+  function etiqueta(classe, rotulo) {
+    const span = document.createElement("span");
+    span.className = `etiqueta ${classe}`;
+    span.textContent = rotulo;
+    return span;
+  }
+
+  function renderizarHistorico(eventos) {
+    const corpo = $("historico");
+    corpo.innerHTML = "";
+    if (!eventos || !eventos.length) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 5;
+      const div = document.createElement("div");
+      div.className = "estado";
+      div.textContent = "Nenhuma análise registrada no período.";
+      td.appendChild(div);
+      tr.appendChild(td);
+      corpo.appendChild(tr);
+      return;
+    }
+
+    eventos.forEach((evento) => {
+      const tr = document.createElement("tr");
+      celula(tr, formatarData(evento.data_hora));
+      celula(tr, etiqueta("canal", NOMES_CANAL[evento.canal] || evento.canal));
+      const ameaca = evento.risco_detectado === "Phishing";
+      celula(tr, etiqueta(ameaca ? "ameaca" : "segura", ameaca ? "Golpe bloqueado" : "Seguro"));
+      celula(tr, `${Math.round((evento.score_risco || 0) * 100)}%`);
+      celula(
+        tr,
+        evento.pii_mascarado_qtd
+          ? `${evento.pii_mascarado_qtd} dado(s) anonimizado(s)`
+          : "sem dado sensível"
+      );
+      corpo.appendChild(tr);
+    });
+  }
+
+  async function carregarPolitica() {
+    try {
+      const resposta = await fetch(`${API}/api/privacidade`);
+      if (!resposta.ok) return;
+      const manifesto = await resposta.json();
+      if (manifesto.resumo) texto($("resumoPrivacidade"), manifesto.resumo);
+      const lista = $("listaGarantias");
+      lista.innerHTML = "";
+      (manifesto.dados_nunca_persistidos || []).forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = `Nunca armazenado: ${item}`;
+        lista.appendChild(li);
+      });
+    } catch (erro) {
+      /* offline: o texto embutido já comunica a política */
+    }
+  }
+
+  async function carregar() {
+    const idConta = $("idConta").value.trim();
+    if (!idConta) {
+      estado($("canais"), "Informe seu identificador para carregar os dados.");
+      return;
+    }
+    localStorage.setItem(CHAVE_CONTA, idConta);
+
+    const dias = $("periodo").value;
+    const url = `${API}/api/metricas/pessoal?id_conta=${encodeURIComponent(idConta)}&dias=${dias}`;
+
+    try {
+      const resposta = await fetch(url);
+      if (!resposta.ok) {
+        const detalhe = await resposta.json().catch(() => ({}));
+        throw new Error(detalhe.detail || `A API respondeu HTTP ${resposta.status}.`);
+      }
+      const dados = await resposta.json();
+      renderizarCartoes(dados);
+      renderizarGrafico(dados.serie_diaria);
+      renderizarCanais(dados.por_canal);
+      renderizarHistorico(dados.historico);
+    } catch (erro) {
+      estado($("canais"), erro.message, true);
+      estado($("grafico"), "Não foi possível carregar o gráfico.", true);
+    }
+  }
+
+  $("btnCarregar").addEventListener("click", carregar);
+  $("periodo").addEventListener("change", carregar);
+  $("idConta").addEventListener("keydown", (e) => { if (e.key === "Enter") carregar(); });
+
+  carregarPolitica();
+  if ($("idConta").value) carregar();
+})();
+</script>
+</body>
+</html>

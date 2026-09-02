@@ -1,215 +1,554 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>HUB - PhishGuard Governança</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --bg-dark: #0b0f19;
-            --bg-card: #151d30;
-            --primary: #10b981;
-            --danger: #ef4444;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: #1e293b;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-        body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.6; padding: 30px 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
-        .logo-title h1 { font-size: 26px; font-weight: 800; background: linear-gradient(to right, #ffffff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo-title p { font-size: 13.5px; color: var(--text-muted); }
-        .refresh-btn { background-color: var(--primary); color: #0b0f19; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
-        .refresh-btn:hover { background-color: #059669; transform: translateY(-1px); }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
-        .stat-card { background-color: var(--bg-card); border: 1px solid var(--border); padding: 25px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .stat-info h3 { font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-        .stat-info .stat-number { font-size: 32px; font-weight: 800; margin-top: 5px; }
-        .stat-icon { font-size: 32px; opacity: 0.8; }
-        .stat-card.total .stat-icon { color: #3b82f6; }
-        .stat-card.phishing .stat-icon { color: var(--danger); }
-        .stat-card.safe .stat-icon { color: var(--primary); }
-        .table-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-        .table-title { padding: 20px; border-bottom: 1px solid var(--border); font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
-        th, td { padding: 16px 20px; border-bottom: 1px solid var(--border); }
-        th { background-color: rgba(11, 15, 25, 0.5); font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em; }
-        tr:hover { background-color: rgba(255, 255, 255, 0.02); cursor: pointer; }
-        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-        .badge.veredito-phishing { background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .badge.veredito-seguro { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .badge.canal-whatsapp { background-color: rgba(37, 211, 102, 0.15); color: #4ade80; }
-        .badge.canal-webchat { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(11, 15, 25, 0.85); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
-        .modal-content { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 600px; padding: 30px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); animation: scaleIn 0.2s ease-out; }
-        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
-        .modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px; }
-        .modal-close:hover { color: white; }
-        .modal-body h4 { font-size: 13px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; margin-top: 20px; }
-        .modal-body pre { background-color: var(--bg-dark); padding: 15px; border-radius: 6px; font-size: 13.5px; border: 1px solid var(--border); white-space: pre-wrap; word-break: break-word; color: #cbd5e1; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PhishGuard Enterprise — Painel SOC</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  /*
+    Vertente B2B. Público: gestor de TI / CISO. Foco em postura de segurança da
+    organização — domínios hostis, exposição da equipe, conformidade.
+    Diferença estrutural em relação à versão anterior: NENHUMA célula desta tela
+    exibe conteúdo de mensagem, porque a API não o expõe mais. O gestor audita o
+    evento, não a correspondência do colaborador.
+  */
+  :root {
+    --bg-dark: #0b0f19;
+    --bg-card: #151d30;
+    --bg-elevado: #1c2740;
+    --primary: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border: #1e293b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.6; padding: 30px 20px 50px; }
+  .container { max-width: 1280px; margin: 0 auto; }
+
+  header { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 22px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+  .logo-title h1 { font-size: 26px; font-weight: 800; background: linear-gradient(to right, #ffffff, var(--primary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .logo-title p { font-size: 13.5px; color: var(--text-muted); }
+  .selo-conformidade {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 8px;
+    background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.3);
+    color: var(--primary); border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 600;
+  }
+
+  .controles { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+  .campo { display: flex; flex-direction: column; gap: 5px; }
+  .campo label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+  .campo input, .campo select {
+    background: var(--bg-elevado); color: var(--text-main); border: 1px solid var(--border);
+    border-radius: 7px; padding: 8px 11px; font-size: 13px; min-width: 150px;
+  }
+  .campo input:focus, .campo select:focus { outline: 2px solid rgba(16,185,129,.4); outline-offset: 1px; }
+  .refresh-btn { background-color: var(--primary); color: #0b0f19; border: none; padding: 9px 18px; border-radius: 7px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; height: 37px; font-size: 13.5px; }
+  .refresh-btn:hover { background-color: #059669; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin: 24px 0; }
+  .stat-card { background-color: var(--bg-card); border: 1px solid var(--border); padding: 20px; border-radius: 11px; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+  .stat-info h3 { font-size: 12.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+  .stat-info .stat-number { font-size: 29px; font-weight: 800; margin-top: 3px; line-height: 1.2; }
+  .stat-info .stat-nota { font-size: 12px; color: var(--text-muted); }
+  .stat-icon { font-size: 27px; opacity: .85; }
+  .stat-card.total .stat-icon { color: var(--info); }
+  .stat-card.phishing .stat-icon, .stat-card.phishing .stat-number { color: var(--danger); }
+  .stat-card.safe .stat-icon, .stat-card.safe .stat-number { color: var(--primary); }
+  .stat-card.privacidade .stat-icon { color: var(--warning); }
+
+  /* stretch alinha a altura do card lateral à do gráfico adjacente. */
+  .colunas { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; align-items: stretch; margin-bottom: 18px; }
+  @media (max-width: 980px) { .colunas { grid-template-columns: 1fr; } }
+
+  .card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 11px; overflow: hidden; }
+  .colunas > .card { display: flex; flex-direction: column; }
+  /* o último bloco do card (corpo/lista) ocupa a folga vertical, evitando
+     espaço morto no rodapé do card lateral mais curto. */
+  .colunas > .card > *:last-child { flex: 1; }
+  .card-title { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 15.5px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+  .card-title i { color: var(--primary); }
+  .card-body { padding: 18px 20px; }
+
+  .grafico { display: flex; align-items: flex-end; justify-content: center; gap: 6px; height: 170px; }
+  /* max-width evita que um único dia vire um bloco gigante ocupando a linha toda. */
+  .coluna { flex: 1 1 0; max-width: 54px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; min-width: 0; }
+  .pilha { display: flex; flex-direction: column-reverse; gap: 2px; }
+  .seg { background: var(--primary); border-radius: 3px 3px 0 0; }
+  .ame { background: var(--danger); border-radius: 3px 3px 0 0; }
+  .rotulo-dia { font-size: 9.5px; color: var(--text-muted); text-align: center; overflow: hidden; white-space: nowrap; }
+  .legenda { display: flex; gap: 18px; font-size: 12.5px; color: var(--text-muted); margin-top: 12px; }
+  .legenda i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 6px; }
+
+  table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px; }
+  th, td { padding: 13px 20px; border-bottom: 1px solid var(--border); }
+  th { background-color: rgba(11,15,25,.5); font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 11.5px; letter-spacing: .05em; }
+  tbody tr:hover { background-color: rgba(255,255,255,.02); }
+  tbody tr:last-child td { border-bottom: none; }
+  code.hash { font-family: "Cascadia Code", Consolas, monospace; font-size: 12.5px; color: #a5b4fc; background: rgba(99,102,241,.1); padding: 2px 7px; border-radius: 5px; }
+
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .badge.veredito-phishing { background-color: rgba(239,68,68,.15); color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+  .badge.veredito-seguro { background-color: rgba(16,185,129,.15); color: #34d399; border: 1px solid rgba(16,185,129,.3); }
+  .badge.canal-whatsapp { background-color: rgba(37,211,102,.15); color: #4ade80; }
+  .badge.canal-webchat { background-color: rgba(59,130,246,.15); color: #60a5fa; }
+  .badge.canal-extensao { background-color: rgba(168,85,247,.15); color: #c084fc; }
+  .badge.camada1 { background-color: rgba(245,158,11,.15); color: #fbbf24; }
+
+  .barra-risco { height: 6px; border-radius: 999px; background: rgba(148,163,184,.15); overflow: hidden; width: 90px; display: inline-block; vertical-align: middle; margin-right: 8px; }
+  .barra-risco span { display: block; height: 100%; background: var(--danger); border-radius: 999px; }
+
+  .aviso-privacidade {
+    display: flex; gap: 13px; align-items: flex-start; margin-top: 20px;
+    background: rgba(16,185,129,.07); border: 1px solid rgba(16,185,129,.22);
+    border-radius: 11px; padding: 16px 19px; font-size: 13px; color: var(--text-muted); line-height: 1.65;
+  }
+  .aviso-privacidade i { color: var(--primary); font-size: 17px; margin-top: 2px; }
+  .aviso-privacidade strong { color: var(--text-main); display: block; margin-bottom: 3px; font-size: 14px; }
+
+  .estado { padding: 26px 20px; text-align: center; color: var(--text-muted); font-size: 13.5px; }
+  .estado.erro { color: #f87171; }
+  footer { margin-top: 26px; text-align: center; font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo-title">
-                <h1>HUB - PhishGuard Governança</h1>
-                <p>Monitoramento ativo e auditoria conversacional de cibersegurança em tempo real</p>
-            </div>
-            <button class="refresh-btn" onclick="carregarLogs()"><i class="fa-solid fa-rotate"></i> Atualizar Logs</button>
-        </header>
+<div class="container">
 
-        <div class="stats-grid">
-            <div class="stat-card total">
-                <div class="stat-info">
-                    <h3>Total Interações</h3>
-                    <div class="stat-number" id="totalInteracoes">0</div>
-                </div>
-                <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
-            </div>
-            <div class="stat-card phishing">
-                <div class="stat-info">
-                    <h3>Ameaças Bloqueadas</h3>
-                    <div class="stat-number" id="ameacasBloqueadas">0</div>
-                </div>
-                <div class="stat-icon"><i class="fa-solid fa-shield-halved"></i></div>
-            </div>
-            <div class="stat-card safe">
-                <div class="stat-info">
-                    <h3>Interações Seguras</h3>
-                    <div class="stat-number" id="interacoesSeguras">0</div>
-                </div>
-                <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
-            </div>
-        </div>
-
-        <div class="table-card">
-            <div class="table-title">
-                <i class="fa-solid fa-list-check" style="color: var(--primary);"></i> Logs de Auditoria Conversacional (Últimas 50 transações)
-            </div>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Data / Hora</th>
-                            <th>Canal</th>
-                            <th>Mensagem Interceptada</th>
-                            <th>Veredito</th>
-                        </tr>
-                    </thead>
-                    <tbody id="logsTableBody">
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum log encontrado ou API offline.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+  <header>
+    <div class="logo-title">
+      <h1>PhishGuard Enterprise — Painel SOC</h1>
+      <p>Governança de segurança, exposição da equipe e conformidade em tempo real</p>
+      <span class="selo-conformidade"><i class="fa-solid fa-lock"></i> Retenção zero · dados de colaboradores pseudonimizados</span>
     </div>
-
-    <!-- Modal para visualização detalhada -->
-    <div class="modal" id="detailModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Detalhes da Interação</h3>
-                <button class="modal-close" onclick="fecharModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body">
-                <div>
-                    <strong>Canal:</strong> <span id="modalCanal"></span> | 
-                    <strong>Data:</strong> <span id="modalData"></span> | 
-                    <strong>Veredito:</strong> <span id="modalVeredito"></span>
-                </div>
-                <h4>Mensagem do Usuário</h4>
-                <pre id="modalMsgUsuario"></pre>
-                <h4>Resposta do Bot (PhishGuard)</h4>
-                <pre id="modalMsgBot"></pre>
-            </div>
-        </div>
+    <div class="controles">
+      <div class="campo">
+        <label for="organizacao">Organização</label>
+        <input type="text" id="organizacao" placeholder="todas" autocomplete="off">
+      </div>
+      <div class="campo">
+        <label for="periodo">Período</label>
+        <select id="periodo">
+          <option value="7">7 dias</option>
+          <option value="30" selected>30 dias</option>
+          <option value="90">90 dias</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="token">Token de governança</label>
+        <input type="password" id="token" placeholder="opcional em dev" autocomplete="off">
+      </div>
+      <button class="refresh-btn" id="btnAtualizar"><i class="fa-solid fa-rotate"></i> Atualizar</button>
     </div>
-    <script>
-        let logsGlobais = [];
+  </header>
 
-        async function carregarLogs() {
-            try {
-                const response = await fetch('http://localhost:8000/api/logs-soc');
-                if (!response.ok) throw new Error();
-                const logs = await response.json();
-                logsGlobais = logs;
-                popularTabela(logs);
-                atualizarCards(logs);
-            } catch (err) {
-                console.error("Erro ao carregar logs da API:", err);
-            }
-        }
+  <div class="stats-grid">
+    <div class="stat-card total">
+      <div class="stat-info">
+        <h3>Eventos analisados</h3>
+        <div class="stat-number" id="sTotal">—</div>
+        <div class="stat-nota" id="sPeriodo">últimos 30 dias</div>
+      </div>
+      <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
+    </div>
+    <div class="stat-card phishing">
+      <div class="stat-info">
+        <h3>Ameaças bloqueadas</h3>
+        <div class="stat-number" id="sAmeacas">—</div>
+        <div class="stat-nota" id="sTaxa">taxa de ameaça —</div>
+      </div>
+      <div class="stat-icon"><i class="fa-solid fa-shield-halved"></i></div>
+    </div>
+    <div class="stat-card safe">
+      <div class="stat-info">
+        <h3>Colaboradores ativos</h3>
+        <div class="stat-number" id="sUsuarios">—</div>
+        <div class="stat-nota">identificados por pseudônimo</div>
+      </div>
+      <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+    </div>
+    <div class="stat-card privacidade">
+      <div class="stat-info">
+        <h3>PII anonimizada</h3>
+        <div class="stat-number" id="sPii">—</div>
+        <div class="stat-nota" id="sLatencia">latência média —</div>
+      </div>
+      <div class="stat-icon"><i class="fa-solid fa-user-shield"></i></div>
+    </div>
+  </div>
 
-        function popularTabela(logs) {
-            const tbody = document.getElementById('logsTableBody');
-            if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum registro encontrado no banco de dados.</td></tr>`;
-                return;
-            }
-            
-            tbody.innerHTML = logs.map((log, index) => {
-                const dataFormatada = new Date(log.data_hora).toLocaleString('pt-BR');
-                const badgeCanal = log.canal === 'whatsapp' 
-                    ? `<span class="badge canal-whatsapp"><i class="fa-brands fa-whatsapp"></i> WhatsApp</span>`
-                    : `<span class="badge canal-webchat"><i class="fa-solid fa-headset"></i> Webchat</span>`;
-                
-                const badgeVeredito = log.risco_detectado === 'Phishing'
-                    ? `<span class="badge veredito-phishing"><i class="fa-solid fa-circle-exclamation"></i> Phishing</span>`
-                    : `<span class="badge veredito-seguro"><i class="fa-solid fa-circle-check"></i> Seguro</span>`;
-                
-                const mensagemCurta = log.mensagem_usuario.length > 60 
-                    ? log.mensagem_usuario.substring(0, 60) + '...' 
-                    : log.mensagem_usuario;
+  <div class="colunas">
+    <section class="card">
+      <div class="card-title"><i class="fa-solid fa-chart-column"></i> Evolução diária de ameaças</div>
+      <div class="card-body">
+        <div class="grafico" id="grafico"></div>
+        <div class="legenda">
+          <span><i style="background:#10b981"></i>Interações seguras</span>
+          <span><i style="background:#ef4444"></i>Ameaças detectadas</span>
+        </div>
+      </div>
+    </section>
 
-                return `
-                    <tr onclick="abrirModal(${index})">
-                        <td style="white-space: nowrap;">${dataFormatada}</td>
-                        <td>${badgeCanal}</td>
-                        <td title="${log.mensagem_usuario}">${mensagemCurta}</td>
-                        <td>${badgeVeredito}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
+    <section class="card">
+      <div class="card-title"><i class="fa-solid fa-globe"></i> Domínios sob risco</div>
+      <div id="dominios"><div class="estado">Carregando…</div></div>
+    </section>
+  </div>
 
-        function atualizarCards(logs) {
-            const total = logs.length;
-            const phishing = logs.filter(l => l.risco_detectado === 'Phishing').length;
-            const safe = total - phishing;
+  <div class="colunas">
+    <section class="card">
+      <div class="card-title"><i class="fa-solid fa-user-secret"></i> Colaboradores mais expostos</div>
+      <div id="colaboradores"><div class="estado">Carregando…</div></div>
+    </section>
 
-            document.getElementById('totalInteracoes').textContent = total;
-            document.getElementById('ameacasBloqueadas').textContent = phishing;
-            document.getElementById('interacoesSeguras').textContent = safe;
-        }
+    <section class="card">
+      <div class="card-title"><i class="fa-solid fa-tower-broadcast"></i> Distribuição por canal</div>
+      <div class="card-body" id="canais"><div class="estado">Carregando…</div></div>
+    </section>
+  </div>
 
-        function abrirModal(index) {
-            const log = logsGlobais[index];
-            const dataFormatada = new Date(log.data_hora).toLocaleString('pt-BR');
-            
-            document.getElementById('modalCanal').textContent = log.canal.toUpperCase();
-            document.getElementById('modalData').textContent = dataFormatada;
-            document.getElementById('modalVeredito').innerHTML = log.risco_detectado === 'Phishing'
-                ? `<span class="badge veredito-phishing">Phishing</span>`
-                : `<span class="badge veredito-seguro">Seguro</span>`;
-                
-            document.getElementById('modalMsgUsuario').textContent = log.mensagem_usuario;
-            document.getElementById('modalMsgBot').textContent = log.resposta_bot;
-            
-            document.getElementById('detailModal').style.display = 'flex';
-        }
+  <section class="card">
+    <div class="card-title"><i class="fa-solid fa-list-check"></i> Trilha de auditoria anonimizada</div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Data / Hora</th><th>Canal</th><th>Colaborador</th><th>Origem</th>
+            <th>Risco</th><th>Veredito</th><th>Camada</th><th>PII mascarada</th>
+          </tr>
+        </thead>
+        <tbody id="eventos">
+          <tr><td colspan="8"><div class="estado">Carregando eventos…</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
-        function fecharModal() {
-            document.getElementById('detailModal').style.display = 'none';
-        }
+  <div class="aviso-privacidade">
+    <i class="fa-solid fa-shield-heart"></i>
+    <div>
+      <strong>Por que esta tela não mostra o conteúdo das mensagens</strong>
+      O PhishGuard opera com retenção zero: o corpo dos e-mails e as mensagens do hub
+      existem apenas em memória volátil durante a análise e nunca são gravados. O painel
+      audita <em>eventos</em> de segurança, não a correspondência dos colaboradores — o que
+      preserva a privacidade da equipe (LGPD, Art. 6º) sem abrir mão da governança.
+      A identificação dos colaboradores é pseudonimizada por HMAC-SHA256 e só pode ser
+      revertida com o sal mantido na infraestrutura, fora do alcance deste painel.
+    </div>
+  </div>
 
-        // Carregar automaticamente na abertura e a cada 10 segundos
-        carregarLogs();
-        setInterval(carregarLogs, 10000);
-    </script>
+  <footer>
+    PhishGuard Enterprise 2.0 · Conformidade com a LGPD (Lei 13.709/2018).<br>
+    Auditoria técnica de retenção disponível em <code>GET /api/privacidade/auditoria</code>.
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const API = localStorage.getItem("phishguard_api") || "http://localhost:8000";
+  const $ = (id) => document.getElementById(id);
+  const CHAVE_TOKEN = "phishguard_token_soc";
+  const CHAVE_ORG = "phishguard_org_soc";
+
+  $("token").value = sessionStorage.getItem(CHAVE_TOKEN) || "";
+  $("organizacao").value = localStorage.getItem(CHAVE_ORG) || "";
+
+  function estado(container, mensagem, erro) {
+    container.innerHTML = "";
+    const div = document.createElement("div");
+    div.className = erro ? "estado erro" : "estado";
+    div.textContent = mensagem;
+    container.appendChild(div);
+  }
+
+  function formatarData(iso) {
+    try { return new Date(iso).toLocaleString("pt-BR"); }
+    catch (e) { return String(iso || "—"); }
+  }
+
+  function badge(classe, rotulo, icone) {
+    const span = document.createElement("span");
+    span.className = `badge ${classe}`;
+    if (icone) {
+      const i = document.createElement("i");
+      i.className = icone;
+      span.appendChild(i);
+    }
+    span.appendChild(document.createTextNode(rotulo));
+    return span;
+  }
+
+  const CANAIS = {
+    whatsapp: ["canal-whatsapp", "WhatsApp", "fa-brands fa-whatsapp"],
+    webchat: ["canal-webchat", "Webchat", "fa-solid fa-headset"],
+    extensao: ["canal-extensao", "E-mail", "fa-solid fa-envelope"],
+  };
+
+  function badgeCanal(canal) {
+    const [classe, rotulo, icone] = CANAIS[canal] || ["canal-webchat", canal || "—", "fa-solid fa-circle-nodes"];
+    return badge(classe, ` ${rotulo}`, icone);
+  }
+
+  function celula(tr, conteudo) {
+    const td = document.createElement("td");
+    if (conteudo instanceof Node) td.appendChild(conteudo);
+    else td.textContent = conteudo;
+    tr.appendChild(td);
+  }
+
+  function barraRisco(score) {
+    const wrap = document.createElement("span");
+    const trilho = document.createElement("span");
+    trilho.className = "barra-risco";
+    const preenchido = document.createElement("span");
+    preenchido.style.width = `${Math.round((score || 0) * 100)}%`;
+    trilho.appendChild(preenchido);
+    wrap.appendChild(trilho);
+    wrap.appendChild(document.createTextNode(`${Math.round((score || 0) * 100)}%`));
+    return wrap;
+  }
+
+  function renderizarCartoes(dados) {
+    const resumo = dados.resumo || {};
+    $("sTotal").textContent = resumo.total ?? 0;
+    $("sAmeacas").textContent = resumo.ameacas ?? 0;
+    $("sUsuarios").textContent = resumo.usuarios_ativos ?? 0;
+    $("sPii").textContent = resumo.pii_mascarados ?? 0;
+    $("sPeriodo").textContent = `últimos ${dados.periodo_dias} dias`;
+    $("sTaxa").textContent = `taxa de ameaça ${resumo.taxa_ameaca_percentual ?? 0}%`;
+    $("sLatencia").textContent = `latência média ${resumo.latencia_media_ms ?? 0} ms`;
+  }
+
+  function renderizarGrafico(serie) {
+    const grafico = $("grafico");
+    grafico.innerHTML = "";
+    if (!serie || !serie.length) { estado(grafico, "Sem atividade no período."); return; }
+    const maximo = Math.max(...serie.map((d) => d.seguros + d.ameacas), 1);
+    const alturaMax = 134;
+
+    serie.slice(-24).forEach((dia) => {
+      const coluna = document.createElement("div");
+      coluna.className = "coluna";
+      coluna.title = `${dia.dia}: ${dia.seguros} segura(s), ${dia.ameacas} ameaça(s)`;
+      const pilha = document.createElement("div");
+      pilha.className = "pilha";
+      if (dia.seguros) {
+        const seg = document.createElement("div");
+        seg.className = "seg";
+        seg.style.height = `${Math.max((dia.seguros / maximo) * alturaMax, 3)}px`;
+        pilha.appendChild(seg);
+      }
+      if (dia.ameacas) {
+        const ame = document.createElement("div");
+        ame.className = "ame";
+        ame.style.height = `${Math.max((dia.ameacas / maximo) * alturaMax, 3)}px`;
+        pilha.appendChild(ame);
+      }
+      const rotulo = document.createElement("div");
+      rotulo.className = "rotulo-dia";
+      rotulo.textContent = `${String(dia.dia).slice(8)}/${String(dia.dia).slice(5, 7)}`;
+      coluna.appendChild(pilha);
+      coluna.appendChild(rotulo);
+      grafico.appendChild(coluna);
+    });
+  }
+
+  function renderizarTabelaSimples(container, linhas, colunas, vazio) {
+    container.innerHTML = "";
+    if (!linhas || !linhas.length) { estado(container, vazio); return; }
+    const wrapper = document.createElement("div");
+    wrapper.style.overflowX = "auto";
+    const tabela = document.createElement("table");
+    const thead = document.createElement("thead");
+    const trHead = document.createElement("tr");
+    colunas.forEach((coluna) => {
+      const th = document.createElement("th");
+      th.textContent = coluna.titulo;
+      trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+    const tbody = document.createElement("tbody");
+    linhas.forEach((linha) => {
+      const tr = document.createElement("tr");
+      colunas.forEach((coluna) => celula(tr, coluna.valor(linha)));
+      tbody.appendChild(tr);
+    });
+    tabela.appendChild(thead);
+    tabela.appendChild(tbody);
+    wrapper.appendChild(tabela);
+    container.appendChild(wrapper);
+  }
+
+  function renderizarDominios(dominios) {
+    renderizarTabelaSimples(
+      $("dominios"),
+      dominios,
+      [
+        { titulo: "Domínio", valor: (d) => d.dominio },
+        { titulo: "Ocorrências", valor: (d) => String(d.ocorrencias) },
+        { titulo: "Risco médio", valor: (d) => barraRisco(d.score_medio) },
+      ],
+      "Nenhum domínio hostil identificado no período."
+    );
+  }
+
+  function renderizarColaboradores(colaboradores) {
+    renderizarTabelaSimples(
+      $("colaboradores"),
+      colaboradores,
+      [
+        {
+          titulo: "Colaborador (pseudônimo)",
+          valor: (c) => {
+            const code = document.createElement("code");
+            code.className = "hash";
+            code.textContent = c.usuario_hash;
+            return code;
+          },
+        },
+        { titulo: "Análises", valor: (c) => String(c.analises) },
+        { titulo: "Ameaças", valor: (c) => String(c.ameacas) },
+        { titulo: "Última atividade", valor: (c) => formatarData(c.ultima_atividade) },
+      ],
+      "Nenhum colaborador exposto a ameaças no período."
+    );
+  }
+
+  const NOMES_CANAL = { extensao: "E-mail (extensão)", whatsapp: "WhatsApp", webchat: "Webchat" };
+
+  function renderizarCanais(canais) {
+    const container = $("canais");
+    container.innerHTML = "";
+    if (!canais || !canais.length) { estado(container, "Nenhum canal utilizado no período."); return; }
+    const total = canais.reduce((soma, c) => soma + c.total, 0) || 1;
+    canais.forEach((canal) => {
+      const bloco = document.createElement("div");
+      bloco.style.marginBottom = "15px";
+      const topo = document.createElement("div");
+      topo.style.cssText = "display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:6px";
+      const nome = document.createElement("span");
+      nome.textContent = NOMES_CANAL[canal.canal] || canal.canal;
+      const valor = document.createElement("strong");
+      valor.textContent = `${canal.total} · ${canal.ameacas} ameaça(s)`;
+      topo.appendChild(nome); topo.appendChild(valor);
+      const trilho = document.createElement("div");
+      trilho.style.cssText = "height:8px;border-radius:999px;background:rgba(148,163,184,.15);overflow:hidden";
+      const preenchido = document.createElement("div");
+      preenchido.style.cssText = `height:100%;background:#10b981;width:${Math.round((canal.total / total) * 100)}%`;
+      trilho.appendChild(preenchido);
+      bloco.appendChild(topo); bloco.appendChild(trilho);
+      container.appendChild(bloco);
+    });
+  }
+
+  function renderizarEventos(eventos) {
+    const corpo = $("eventos");
+    corpo.innerHTML = "";
+    if (!eventos || !eventos.length) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 8;
+      const div = document.createElement("div");
+      div.className = "estado";
+      div.textContent = "Nenhum evento registrado no período.";
+      td.appendChild(div);
+      tr.appendChild(td); corpo.appendChild(tr);
+      return;
+    }
+
+    eventos.forEach((evento) => {
+      const tr = document.createElement("tr");
+      celula(tr, formatarData(evento.data_hora));
+      celula(tr, badgeCanal(evento.canal));
+
+      const code = document.createElement("code");
+      code.className = "hash";
+      code.textContent = evento.usuario_hash || "—";
+      celula(tr, code);
+
+      celula(tr, evento.dominio_remetente || "—");
+      celula(tr, barraRisco(evento.score_risco));
+
+      const ameaca = evento.risco_detectado === "Phishing";
+      celula(
+        tr,
+        badge(
+          ameaca ? "veredito-phishing" : "veredito-seguro",
+          ameaca ? " Phishing" : " Seguro",
+          ameaca ? "fa-solid fa-circle-exclamation" : "fa-solid fa-circle-check"
+        )
+      );
+
+      celula(
+        tr,
+        evento.dupla_checagem
+          ? badge("veredito-seguro", " Camada 2 (IA)", "fa-solid fa-brain")
+          : badge("camada1", " Camada 1", "fa-solid fa-calculator")
+      );
+
+      celula(tr, evento.pii_mascarado_qtd ? `${evento.pii_mascarado_qtd} (${evento.pii_tipos || "—"})` : "—");
+      corpo.appendChild(tr);
+    });
+  }
+
+  async function carregar() {
+    const dias = $("periodo").value;
+    const organizacao = $("organizacao").value.trim();
+    const token = $("token").value.trim();
+
+    sessionStorage.setItem(CHAVE_TOKEN, token);
+    localStorage.setItem(CHAVE_ORG, organizacao);
+
+    const parametros = new URLSearchParams({ dias });
+    if (organizacao) parametros.set("organizacao", organizacao);
+
+    const cabecalhos = token ? { "X-PhishGuard-Token": token } : {};
+
+    try {
+      const resposta = await fetch(`${API}/api/metricas/corporativo?${parametros}`, { headers: cabecalhos });
+      if (resposta.status === 401) {
+        throw new Error("Token de governança inválido ou ausente.");
+      }
+      if (!resposta.ok) {
+        const detalhe = await resposta.json().catch(() => ({}));
+        throw new Error(detalhe.detail || `A API respondeu HTTP ${resposta.status}.`);
+      }
+      const dados = await resposta.json();
+      renderizarCartoes(dados);
+      renderizarGrafico(dados.serie_diaria);
+      renderizarDominios(dados.dominios_sob_risco);
+      renderizarColaboradores(dados.colaboradores_em_risco);
+      renderizarCanais(dados.por_canal);
+      renderizarEventos(dados.eventos);
+    } catch (erro) {
+      [$("dominios"), $("colaboradores"), $("canais")].forEach((el) => estado(el, erro.message, true));
+      estado($("grafico"), "Não foi possível carregar o gráfico.", true);
+      const corpo = $("eventos");
+      corpo.innerHTML = "";
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 8;
+      const div = document.createElement("div");
+      div.className = "estado erro";
+      div.textContent = erro.message;
+      td.appendChild(div); tr.appendChild(td); corpo.appendChild(tr);
+    }
+  }
+
+  $("btnAtualizar").addEventListener("click", carregar);
+  $("periodo").addEventListener("change", carregar);
+  [$("organizacao"), $("token")].forEach((campo) =>
+    campo.addEventListener("keydown", (e) => { if (e.key === "Enter") carregar(); })
+  );
+
+  carregar();
+  // Atualização periódica — o SOC é uma tela de parede.
+  setInterval(carregar, 30000);
+})();
+</script>
 </body>
 </html>
