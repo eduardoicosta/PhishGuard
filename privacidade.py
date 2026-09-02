@@ -54,6 +54,28 @@ SAL_CONFIGURADO = bool(os.getenv("PHISHGUARD_SAL_PSEUDONIMO"))
 # Tag usada quando o mascaramento precisa falhar de forma fechada.
 TAG_GENERICA = "[DADOS_CONFIDENCIAIS]"
 
+# Rótulo explícito para quando o 'De:' não pôde ser capturado. É deliberadamente
+# uma frase (não um e-mail sintético) para que a IA NÃO a interprete como um
+# domínio real e não alucine análise de spoofing sobre "desconhecido.com".
+REMETENTE_NAO_INFORMADO = "(remetente não informado)"
+
+# Valores herdados/placeholder que devem ser tratados como "ausente".
+_REMETENTES_AUSENTES = {
+    "",
+    "desconhecido",
+    "desconhecido@desconhecido.com",
+    "unknown",
+    "unknown@unknown.com",
+    "nao informado",
+    "não informado",
+}
+
+
+def _remetente_ausente(remetente: Optional[str]) -> bool:
+    if not remetente:
+        return True
+    return remetente.strip().strip("<>").lower() in _REMETENTES_AUSENTES
+
 
 # ---------------------------------------------------------------------------
 # Validadores auxiliares (reduzem falso-positivo do mascaramento)
@@ -338,17 +360,24 @@ def mascarar_remetente(remetente: Optional[str]) -> str:
     excedente: o nome de exibição, que identifica uma pessoa natural sem
     contribuir para a detecção.
     """
-    if not remetente:
-        return "desconhecido@desconhecido.com"
+    if _remetente_ausente(remetente):
+        return REMETENTE_NAO_INFORMADO
+    # 1. Formato "Nome <email@dominio>": preserva o endereço técnico.
     match = re.search(r"<([^>]+)>", remetente)
     if match:
-        return match.group(1).strip()
-    return remetente.strip()
+        endereco = match.group(1).strip()
+        return endereco or REMETENTE_NAO_INFORMADO
+    # 2. Texto solto: extrai o primeiro e-mail válido, se houver.
+    achado = re.search(r"[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}", remetente, re.IGNORECASE)
+    if achado:
+        return achado.group(0)
+    # 3. Sem e-mail reconhecível: nunca devolve o placeholder herdado.
+    return remetente.strip() or REMETENTE_NAO_INFORMADO
 
 
 def extrair_dominio(remetente: Optional[str]) -> str:
     """Domínio do remetente — metadado técnico, não identifica pessoa natural."""
-    if not remetente:
+    if _remetente_ausente(remetente):
         return "desconhecido"
     _, endereco = parseaddr(remetente)
     alvo = endereco or remetente

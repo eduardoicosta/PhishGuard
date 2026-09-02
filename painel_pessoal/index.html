@@ -82,10 +82,17 @@
   .cartao .numero { font-size: 30px; font-weight: 800; line-height: 1.15; letter-spacing: -.02em; }
   .cartao .nota { font-size: 12.5px; color: var(--texto-secundario); }
 
-  .colunas { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; align-items: start; }
+  /* stretch (padrão do grid) faz os dois painéis da linha terem a mesma altura;
+     'start' deixava o card lateral "flutuando" mais curto que o gráfico. */
+  .colunas { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; align-items: stretch; }
   @media (max-width: 860px) { .colunas { grid-template-columns: 1fr; } }
 
-  .painel { background: var(--superficie); border: 1px solid var(--borda); border-radius: 14px; box-shadow: var(--sombra); overflow: hidden; }
+  .painel {
+    background: var(--superficie); border: 1px solid var(--borda); border-radius: 14px;
+    box-shadow: var(--sombra); overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .colunas > .painel > *:last-child { flex: 1; }
   .painel > h2 {
     font-size: 15.5px; font-weight: 700; padding: 17px 20px; border-bottom: 1px solid var(--borda);
     display: flex; align-items: center; gap: 10px;

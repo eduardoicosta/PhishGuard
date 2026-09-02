@@ -100,17 +100,25 @@
       extrairAssunto: () =>
         consultarTexto(["h2.hP", "[data-thread-perm-id] h2", ".ha h2"], (el) => el.textContent),
       extrairRemetente() {
-        const container = document.querySelector(".adn, .gE");
-        if (!container) return "desconhecido@desconhecido.com";
+        const container = document.querySelector(".adn, .gE") || document;
         const remetenteEl =
           container.querySelector("span[email]") ||
           container.querySelector("[email]") ||
+          container.querySelector('a[href^="mailto:"]') ||
           container.querySelector(".gD");
-        if (!remetenteEl) return "desconhecido@desconhecido.com";
-        const email =
-          remetenteEl.getAttribute("email") || remetenteEl.getAttribute("data-sender-email");
+        if (!remetenteEl) return "";
+        let email =
+          remetenteEl.getAttribute("email") ||
+          remetenteEl.getAttribute("data-sender-email") ||
+          "";
+        if (!email) {
+          const href = remetenteEl.getAttribute("href") || "";
+          if (href.toLowerCase().startsWith("mailto:")) {
+            email = decodeURIComponent(href.slice(7)).split("?")[0].trim();
+          }
+        }
         const nome = remetenteEl.textContent.trim();
-        return email && nome ? `${nome} <${email}>` : email || nome || "desconhecido@desconhecido.com";
+        return email && nome ? `${nome} <${email}>` : email || nome || "";
       },
       extrairCorpoTexto: () =>
         consultarTexto([".ii.gt", ".a3s.aiL", ".a3s"], (el) => el.innerText || el.textContent),
@@ -132,35 +140,158 @@
         return "";
       },
       extrairRemetente() {
+        // A UI do Outlook Web troca de classes CSS a cada release. Priorizamos
+        // atributos semânticos estáveis (mailto:, [email], data-log-name) e só
+        // então caímos para varredura textual por regex de e-mail.
         const container = document.querySelector('[role="main"]') || document;
-        const corpoEl = container.querySelector('[role="document"], [aria-label*="Message body"]');
-        const contemEmail = (texto) => /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(texto);
-        const limpa = (t) => (t ? t.trim().replace(/^(From|De|Remetente):\s*/i, "").trim() : null);
-        const seletores = [
-          'span[title*="@"]',
-          'div[title*="@"]',
-          'button[title*="@"]',
-          'a[href^="mailto:"]',
-          '[aria-label^="From"]',
-          '[aria-label*="From:"]',
-          '[aria-label^="De:"]',
-          '[data-test-id="sender-address"]',
-          "span[email]",
+        const corpoEl = container.querySelector('[role="document"], [aria-label*="Message body" i]');
+
+        // Regex propositalmente permissiva: golpes usam domínios sintéticos sem
+        // TLD padrão (ex.: "infracao@detran252522"). Exigir ".com/.br" faria o
+        // script ignorar o invasor e cair no e-mail legítimo da vítima no "Para:".
+        const RE_EMAIL = /[^\s@<>"]+@[^\s@<>"]+/;
+        const limparEndereco = (e) =>
+          String(e || "").trim().replace(/^[<("']+/, "").replace(/[>)"'.,;:]+$/, "").trim();
+
+        // Qualquer elemento dentro de um bloco de destinatários ("Para/To/Cc/Cco")
+        // é veneno: NUNCA pode ser lido como remetente.
+        const SELETORES_DESTINATARIO = [
+          '[aria-label^="To" i]',
+          '[aria-label^="Para" i]',
+          '[aria-label^="Cc" i]',
+          '[aria-label^="Cco" i]',
+          '[aria-label^="Bcc" i]',
+          '[aria-label^="Cópia" i]',
+          '[aria-label*="recipient" i]',
+          '[aria-label*="destinat" i]',
+          '[data-testid*="recipient" i]',
+          '[data-test-id*="recipient" i]',
+          '[automationid*="recipient" i]',
+          '[automation-id*="recipient" i]',
+          '[id*="recipient" i]',
+          '[id*="ToWell" i]',
+          '[id*="CcWell" i]',
+          '[id*="BccWell" i]',
+        ].join(",");
+
+        const ehDestinatario = (el) => {
+          if (!el || !el.closest) return false;
+          try {
+            if (el.closest(SELETORES_DESTINATARIO)) return true;
+          } catch (_) {
+            /* seletor incompatível com o motor — ignora */
+          }
+          // Heurística textual: um ancestral próximo rotulado "Para:/To:/Cc:".
+          let no = el;
+          for (let i = 0; i < 4 && no; i += 1, no = no.parentElement) {
+            if (!no.getAttribute) continue;
+            const rotulo = no.getAttribute("aria-label") || no.getAttribute("title") || "";
+            if (/^\s*(to|para|cc|cco|bcc|c[oó]pia)\s*[:\-]/i.test(rotulo)) return true;
+          }
+          return false;
+        };
+
+        const inaceitavel = (el) =>
+          !el || (corpoEl && corpoEl.contains(el)) || ehDestinatario(el);
+
+        const limpaNome = (t) =>
+          (t || "")
+            .replace(RE_EMAIL, "")
+            .replace(/^\s*(From|De|Remetente|Sender)\s*[:\-]?\s*/i, "")
+            .replace(/[<>();,"]/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+        const montar = (fonte, emailBruto) => {
+          const email = limparEndereco(emailBruto);
+          if (!email || !RE_EMAIL.test(email)) return "";
+          const nome = limpaNome(fonte);
+          return nome && nome.toLowerCase() !== email.toLowerCase() ? `${nome} <${email}>` : email;
+        };
+
+        // Dado um elemento aceitável, devolve [email, textoFonte] ou null.
+        const extrairDeElemento = (el) => {
+          if (inaceitavel(el)) return null;
+          const href = (el.getAttribute && el.getAttribute("href")) || "";
+          if (/^mailto:/i.test(href)) {
+            const e = limparEndereco(decodeURIComponent(href.slice(7)).split("?")[0]);
+            if (RE_EMAIL.test(e)) return [e, el.textContent || ""];
+          }
+          const fontes = [
+            el.getAttribute && el.getAttribute("email"),
+            el.getAttribute && el.getAttribute("data-log-name"),
+            el.getAttribute && el.getAttribute("title"),
+            el.getAttribute && el.getAttribute("aria-label"),
+            el.textContent,
+          ];
+          for (const fonte of fontes) {
+            if (!fonte) continue;
+            const m = String(fonte).match(RE_EMAIL);
+            if (m) return [limparEndereco(m[0]), String(fonte)];
+          }
+          return null;
+        };
+
+        // 1. Restringe a busca ao contêiner de QUEM ENVIA. No painel de leitura do
+        //    Outlook o remetente é renderizado ANTES do bloco de destinatários.
+        const escoposRemetente = [];
+        const seletoresCabecalho = [
+          'span[id*="readingPaneHeader" i]',
+          '[id*="readingPaneHeader" i]',
+          '[automationid*="SenderPersona" i]',
+          '[automation-id*="SenderPersona" i]',
+          '[id*="SenderPersona" i]',
+          '[data-testid*="sender" i]',
+          '[aria-label^="From" i]',
+          '[aria-label^="De:" i]',
         ];
-        for (const seletor of seletores) {
-          for (const el of container.querySelectorAll(seletor)) {
-            if (corpoEl && corpoEl.contains(el)) continue;
-            const title = el.getAttribute("title");
-            if (title && contemEmail(title)) return limpa(title);
-            const aria = el.getAttribute("aria-label");
-            if (aria && (contemEmail(aria) || aria.toLowerCase().startsWith("from"))) {
-              return limpa(aria);
-            }
-            const text = el.textContent.trim();
-            if (contemEmail(text) || text.startsWith("From:")) return limpa(text);
+        for (const sel of seletoresCabecalho) {
+          for (const no of container.querySelectorAll(sel)) {
+            if (no && !ehDestinatario(no)) escoposRemetente.push(no);
           }
         }
-        return "desconhecido@desconhecido.com";
+        escoposRemetente.push(container); // fallback: painel inteiro (recipientes já são filtrados)
+
+        const seletoresRemetente = [
+          'a[href^="mailto:" i]',
+          "span[email]",
+          "[email]",
+          "[data-log-name]",
+          'button[title*="@"]',
+          'span[title*="@"]',
+          '[title*="@"]',
+          '[aria-label*="@"]',
+        ];
+
+        for (const escopo of escoposRemetente) {
+          for (const sel of seletoresRemetente) {
+            let candidatos;
+            try {
+              candidatos = escopo.querySelectorAll(sel);
+            } catch (_) {
+              continue;
+            }
+            for (const el of candidatos) {
+              const achado = extrairDeElemento(el);
+              if (achado) {
+                const remetente = montar(achado[1], achado[0]);
+                if (remetente) return remetente;
+              }
+            }
+          }
+        }
+
+        // 2. Último recurso: primeiro e-mail em texto do cabeçalho de leitura,
+        //    ignorando qualquer trecho pertencente a um bloco de destinatários.
+        const cabecalho =
+          container.querySelector('span[id*="readingPaneHeader" i]') ||
+          container.querySelector('[role="heading"]') ||
+          container.querySelector(".allowTextSelection");
+        if (cabecalho && !ehDestinatario(cabecalho)) {
+          const bruto = (cabecalho.textContent || "").match(RE_EMAIL);
+          if (bruto) return limparEndereco(bruto[0]);
+        }
+
+        return "";
       },
       extrairCorpoTexto: () =>
         consultarTexto(
@@ -177,6 +308,7 @@
     const assunto = prov.extrairAssunto();
     const corpoTexto = prov.extrairCorpoTexto();
     const remetente = prov.extrairRemetente();
+    console.log("[PhishGuard] Remetente extraído:", remetente);
     if (!assunto || !corpoTexto) return null;
     return { assunto, corpoTexto, remetente };
   }

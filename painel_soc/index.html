@@ -60,10 +60,15 @@
   .stat-card.safe .stat-icon, .stat-card.safe .stat-number { color: var(--primary); }
   .stat-card.privacidade .stat-icon { color: var(--warning); }
 
-  .colunas { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; align-items: start; margin-bottom: 18px; }
+  /* stretch alinha a altura do card lateral à do gráfico adjacente. */
+  .colunas { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; align-items: stretch; margin-bottom: 18px; }
   @media (max-width: 980px) { .colunas { grid-template-columns: 1fr; } }
 
   .card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 11px; overflow: hidden; }
+  .colunas > .card { display: flex; flex-direction: column; }
+  /* o último bloco do card (corpo/lista) ocupa a folga vertical, evitando
+     espaço morto no rodapé do card lateral mais curto. */
+  .colunas > .card > *:last-child { flex: 1; }
   .card-title { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 15.5px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
   .card-title i { color: var(--primary); }
   .card-body { padding: 18px 20px; }

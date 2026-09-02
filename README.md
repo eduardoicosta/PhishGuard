@@ -1,60 +1,60 @@
 # PhishGuard
 
-Plataforma de deteccao de phishing multicanal (e-mail, WhatsApp e webchat), operando como uma solucao de Security as a Service (SECaaS) com arquitetura de privacidade Zero-Retention e conformidade nativa com a Lei Geral de Protecao de Dados (Lei 13.709/2018).
+Plataforma de detecção de phishing multicanal (e-mail, WhatsApp e webchat), operando como uma solução de Security as a Service (SECaaS) com arquitetura de privacidade Zero-Retention e conformidade nativa com a Lei Geral de Proteção de Dados (Lei 13.709/2018).
 
-O sistema combina um motor de classificacao estatistica local (Ensemble Learning) com uma camada de analise contextual via Inteligencia Artificial Generativa (Google Gemini), aplicando um mecanismo obrigatorio de anonimizacao de dados pessoais antes de qualquer processamento externo.
+O sistema combina um motor de classificação estatística local (Ensemble Learning) com uma camada de análise contextual via Inteligência Artificial Generativa (Google Gemini), aplicando um mecanismo obrigatório de anonimização de dados pessoais antes de qualquer processamento externo.
 
 ---
 
-## Indice
+## Índice
 
-1. [Visao Geral do Projeto e Proposta de Valor](#1-visao-geral-do-projeto-e-proposta-de-valor)
+1. [Visão Geral do Projeto e Proposta de Valor](#1-visão-geral-do-projeto-e-proposta-de-valor)
 2. [Arquitetura do Sistema e Componentes](#2-arquitetura-do-sistema-e-componentes)
 3. [Privacidade e Conformidade (LGPD by Design)](#3-privacidade-e-conformidade-lgpd-by-design)
-4. [Estrutura do Repositorio e Modulos](#4-estrutura-do-repositorio-e-modulos)
-5. [Guia de Instalacao e Configuracao de Ambiente](#5-guia-de-instalacao-e-configuracao-de-ambiente)
-6. [Documentacao de Endpoints da API](#6-documentacao-de-endpoints-da-api)
-7. [Testes, Migracao e Validacao](#7-testes-migracao-e-validacao)
+4. [Estrutura do Repositório e Módulos](#4-estrutura-do-repositório-e-módulos)
+5. [Guia de Instalação e Configuração de Ambiente](#5-guia-de-instalação-e-configuração-de-ambiente)
+6. [Documentação de Endpoints da API](#6-documentação-de-endpoints-da-api)
+7. [Testes, Migração e Validação](#7-testes-migração-e-validação)
 8. [Equipe](#8-equipe)
 
 ---
 
-## 1. Visao Geral do Projeto e Proposta de Valor
+## 1. Visão Geral do Projeto e Proposta de Valor
 
-O PhishGuard nasceu como um Produto Minimo Viavel academico (Enterprise Challenge - FIAP/CLARO) e evoluiu para uma arquitetura de produto corporativo (Enterprise SaaS), estruturada para suportar auditoria tecnica, conformidade legal rigorosa e expansao comercial simultanea em dois segmentos de mercado distintos, compartilhando o mesmo motor de deteccao e a mesma infraestrutura de dados.
+O PhishGuard nasceu como um Produto Mínimo Viável acadêmico (Enterprise Challenge - FIAP/CLARO) e evoluiu para uma arquitetura de produto corporativo (Enterprise SaaS), estruturada para suportar auditoria técnica, conformidade legal rigorosa e expansão comercial simultânea em dois segmentos de mercado distintos, compartilhando o mesmo motor de detecção e a mesma infraestrutura de dados.
 
-### 1.1. Modelo de Negocio Dual
+### 1.1. Modelo de Negócio Dual
 
 **PhishGuard Enterprise (B2B)**
-Direcionado a Security Operations Centers (SOC), gestores de Tecnologia da Informacao e Chief Information Security Officers (CISO). Entrega governanca centralizada sobre a postura de seguranca da organizacao: ranking de dominios hostis, exposicao de colaboradores a ataques (identificados por pseudonimo criptografico, nunca pelo nome), distribuicao de ameacas por canal de comunicacao e trilha de auditoria integralmente anonimizada. O acesso aos endpoints de governanca e protegido por token de autenticacao dedicado.
+Direcionado a Security Operations Centers (SOC), gestores de Tecnologia da Informação e Chief Information Security Officers (CISO). Entrega governança centralizada sobre a postura de segurança da organização: ranking de domínios hostis, exposição de colaboradores a ataques (identificados por pseudônimo criptográfico, nunca pelo nome), distribuição de ameaças por canal de comunicação e trilha de auditoria integralmente anonimizada. O acesso aos endpoints de governança é protegido por token de autenticação dedicado.
 
 **PhishGuard Personal (B2C)**
-Direcionado ao usuario final e ao ambiente familiar. Entrega uma experiencia de protecao individual, com metricas pessoais de e-mails analisados, historico de ameacas bloqueadas e um painel dedicado que opera de forma isolada por identificador de conta, sem qualquer visibilidade cruzada entre titulares distintos.
+Direcionado ao usuário final e ao ambiente familiar. Entrega uma experiência de proteção individual, com métricas pessoais de e-mails analisados, histórico de ameaças bloqueadas e um painel dedicado que opera de forma isolada por identificador de conta, sem qualquer visibilidade cruzada entre titulares distintos.
 
-### 1.2. Proposta de Valor Tecnica
+### 1.2. Proposta de Valor Técnica
 
-- **Deteccao em duas camadas independentes**, permitindo que o sistema continue operando com precisao reduzida (porem funcional) mesmo na indisponibilidade total de servicos de Inteligencia Artificial de terceiros.
-- **Privacidade estrutural, nao contratual**: a garantia de nao retencao de conteudo e imposta pelo proprio contrato de dados do codigo (schema de persistencia), nao apenas por uma clausula de politica de uso.
-- **Operacao hibrida em tempo real** dentro do proprio webmail do usuario (Gmail e Outlook Web), sem exigir migracao de provedor de e-mail ou instalacao de agentes de sistema operacional.
-- **Canal de resposta conversacional** replicado em WhatsApp e webchat, com o mesmo padrao de anonimizacao preventiva aplicado uniformemente em todos os canais.
+- **Detecção em duas camadas independentes**, permitindo que o sistema continue operando com precisão reduzida (porém funcional) mesmo na indisponibilidade total de serviços de Inteligência Artificial de terceiros.
+- **Privacidade estrutural, não contratual**: a garantia de não retenção de conteúdo é imposta pelo próprio contrato de dados do código (schema de persistência), não apenas por uma cláusula de política de uso.
+- **Operação híbrida em tempo real** dentro do próprio webmail do usuário (Gmail e Outlook Web), sem exigir migração de provedor de e-mail ou instalação de agentes de sistema operacional.
+- **Canal de resposta conversacional** replicado em WhatsApp e webchat, com o mesmo padrão de anonimização preventiva aplicado uniformemente em todos os canais.
 
 ---
 
 ## 2. Arquitetura do Sistema e Componentes
 
-O sistema e composto por quatro subsistemas independentes que se comunicam exclusivamente via HTTP/JSON, permitindo substituicao e escalonamento isolado de cada camada.
+O sistema é composto por quatro subsistemas independentes que se comunicam exclusivamente via HTTP/JSON, permitindo substituição e escalonamento isolado de cada camada.
 
 ```
 +-------------------------+      +--------------------------+      +----------------------+
-|  Extensao de Navegador  | ---> |    Backend (FastAPI)      | ---> |  Camada de IA (2 nv.) |
-|  Gmail / Outlook Web    |      |  Orquestracao assincrona  |      |  Estatistica + Gemini |
+|  Extensão de Navegador  | ---> |    Backend (FastAPI)      | ---> |  Camada de IA (2 nv.) |
+|  Gmail / Outlook Web    |      |  Orquestração assíncrona  |      |  Estatística + Gemini |
 +-------------------------+      +--------------------------+      +----------------------+
                                             |
                                             v
                                   +--------------------------+
-                                  |  Persistencia (PostgreSQL)|
+                                  |  Persistência (PostgreSQL)|
                                   |  Somente metadados        |
-                                  |  agregados e anonimos     |
+                                  |  agregados e anônimos     |
                                   +--------------------------+
                                             |
                         +-------------------+-------------------+
@@ -65,143 +65,143 @@ O sistema e composto por quatro subsistemas independentes que se comunicam exclu
               +-------------------+                   +-------------------+
 ```
 
-### 2.1. Extensao de Navegador (Manifest V3)
+### 2.1. Extensão de Navegador (Manifest V3)
 
-Implementada em `extensao_chrome/`, compativel com Google Chrome e Microsoft Edge (baseado em Chromium), operando sobre os dominios `mail.google.com`, `outlook.office.com`, `outlook.office365.com` e `outlook.live.com`.
+Implementada em `extensao_chrome/`, compatível com Google Chrome e Microsoft Edge (baseado em Chromium), operando sobre os domínios `mail.google.com`, `outlook.office.com`, `outlook.office365.com` e `outlook.live.com`.
 
-A extensao e dividida em tres processos com responsabilidades estritamente segregadas:
+A extensão é dividida em três processos com responsabilidades estritamente segregadas:
 
-- **`content.js` (Content Script)**: executa no contexto da pagina do webmail. Realiza a extracao estrutural do assunto, corpo e remetente do e-mail diretamente do DOM, utilizando seletores especificos e resilientes por provedor. Tambem e responsavel pela injecao visual do banner de veredito e do modal de transparencia LGPD, preservando a identidade visual corporativa (fundo `#1e293b`, borda lateral de status colorida por nivel de risco e icone de escudo em SVG). Para o Outlook, o script utiliza uma estrategia de injecao na "zona cega" do DOM (dentro do corpo da mensagem) para evitar que o motor de reconciliacao React da Microsoft remova o elemento injetado.
-- **`background.js` (Service Worker)**: motivo tecnico central da arquitetura MV3 deste projeto. O navegador aplica a politica de Private Network Access (PNA), que bloqueia requisicoes originadas de uma pagina publica (`https://outlook.live.com`) contra o espaco de enderecamento de loopback (`http://localhost:8000`), mesmo com CORS liberado no servidor. Como o Service Worker executa na origem privilegiada `chrome-extension://`, ele nao esta sujeito a essa restricao nem ao bloqueio de CORS, funcionando como um proxy de confianca entre o Content Script e a API. Tambem concentra a logica de resiliencia de rede (timeout de 20 segundos, retry com backoff exponencial) e o armazenamento local de configuracao e estatisticas agregadas via `chrome.storage.local`.
-- **`popup.js` / `popup.html`**: interface de configuracao da extensao, exposta ao clicar no icone da extensao na barra do navegador. Contempla tres abas: Protecao (metricas locais do usuario), Privacidade (selo de transparencia e solicitacao de eliminacao de dados) e Conta (selecao de perfil B2B/B2C e endpoint da API).
+- **`content.js` (Content Script)**: executa no contexto da página do webmail. Realiza a extração estrutural do assunto, corpo e remetente do e-mail diretamente do DOM, utilizando seletores específicos e resilientes por provedor. Também é responsável pela injeção visual do banner de veredito e do modal de transparência LGPD, preservando a identidade visual corporativa (fundo `#1e293b`, borda lateral de status colorida por nível de risco e ícone de escudo em SVG). Para o Outlook, o script utiliza uma estratégia de injeção na "zona cega" do DOM (dentro do corpo da mensagem) para evitar que o motor de reconciliação React da Microsoft remova o elemento injetado.
+- **`background.js` (Service Worker)**: motivo técnico central da arquitetura MV3 deste projeto. O navegador aplica a política de Private Network Access (PNA), que bloqueia requisições originadas de uma página pública (`https://outlook.live.com`) contra o espaço de endereçamento de loopback (`http://localhost:8000`), mesmo com CORS liberado no servidor. Como o Service Worker executa na origem privilegiada `chrome-extension://`, ele não está sujeito a essa restrição nem ao bloqueio de CORS, funcionando como um proxy de confiança entre o Content Script e a API. Também concentra a lógica de resiliência de rede (timeout de 20 segundos, retry com backoff exponencial) e o armazenamento local de configuração e estatísticas agregadas via `chrome.storage.local`.
+- **`popup.js` / `popup.html`**: interface de configuração da extensão, exposta ao clicar no ícone da extensão na barra do navegador. Contempla três abas: Proteção (métricas locais do usuário), Privacidade (selo de transparência e solicitação de eliminação de dados) e Conta (seleção de perfil B2B/B2C e endpoint da API).
 
 ### 2.2. Backend (FastAPI)
 
-Implementado em `api.py`, o backend e construido sobre FastAPI com operacao integralmente assincrona (`async/await`), aproveitando o modelo de concorrencia baseado em event loop para atender multiplas requisicoes de analise sem bloqueio de thread durante chamadas de rede (Gemini) ou de banco de dados.
+Implementado em `api.py`, o backend é construído sobre FastAPI com operação integralmente assíncrona (`async/await`), aproveitando o modelo de concorrência baseado em event loop para atender múltiplas requisições de análise sem bloqueio de thread durante chamadas de rede (Gemini) ou de banco de dados.
 
-Caracteristicas de engenharia relevantes:
+Características de engenharia relevantes:
 
-- **Injecao de estado via ciclo de vida (`lifespan`)**: os modelos de Machine Learning, o cliente do Gemini e o pool de conexoes do banco de dados sao inicializados uma unica vez na subida do processo e reutilizados por todas as requisicoes, eliminando custo de inicializacao por chamada.
-- **Middleware de seguranca dedicado**: alem do CORS padrao, um middleware customizado responde explicitamente aos preflights de Private Network Access exigidos pelo Chrome quando a origem publica do webmail acessa o servidor local, e aplica cabecalhos de endurecimento (`X-Content-Type-Options`, `Cache-Control: no-store`, `X-PhishGuard-Data-Retention: none`) em toda resposta.
-- **Resiliencia operacional dedicada** (`resiliencia.py`): toda chamada a Camada 2 (Gemini) e envolvida por um mecanismo de tres niveis:
-  - **Timeout rigido por tentativa**, garantindo que nenhuma requisicao do usuario final fique bloqueada indefinidamente aguardando o provedor externo.
-  - **Retry com backoff exponencial e jitter aleatorio**, absorvendo falhas transitorias (HTTP 429, 503, reset de conexao) sem gerar tempestade de requisicoes sincronizadas contra o provedor.
-  - **Circuit Breaker por rota de uso** (um circuito para o canal de e-mail, outro para o hub conversacional): apos um numero configuravel de falhas consecutivas, o circuito abre e as chamadas subsequentes falham instantaneamente para o fallback local, sem consumir o timeout completo a cada usuario. O circuito fecha automaticamente apos um periodo de recuperacao, testando a dependencia com uma chamada de sondagem.
-- **Injecao de dependencias do FastAPI** aplicada na protecao dos endpoints de governanca corporativa, via `Depends(exigir_token_admin)`, validando o cabecalho `X-PhishGuard-Token` contra a variavel de ambiente `PHISHGUARD_ADMIN_TOKEN`.
+- **Injeção de estado via ciclo de vida (`lifespan`)**: os modelos de Machine Learning, o cliente do Gemini e o pool de conexões do banco de dados são inicializados uma única vez na subida do processo e reutilizados por todas as requisições, eliminando custo de inicialização por chamada.
+- **Middleware de segurança dedicado**: além do CORS padrão, um middleware customizado responde explicitamente aos preflights de Private Network Access exigidos pelo Chrome quando a origem pública do webmail acessa o servidor local, e aplica cabeçalhos de endurecimento (`X-Content-Type-Options`, `Cache-Control: no-store`, `X-PhishGuard-Data-Retention: none`) em toda resposta.
+- **Resiliência operacional dedicada** (`resiliencia.py`): toda chamada à Camada 2 (Gemini) é envolvida por um mecanismo de três níveis:
+  - **Timeout rígido por tentativa**, garantindo que nenhuma requisição do usuário final fique bloqueada indefinidamente aguardando o provedor externo.
+  - **Retry com backoff exponencial e jitter aleatório**, absorvendo falhas transitórias (HTTP 429, 503, reset de conexão) sem gerar tempestade de requisições sincronizadas contra o provedor.
+  - **Circuit Breaker por rota de uso** (um circuito para o canal de e-mail, outro para o hub conversacional): após um número configurável de falhas consecutivas, o circuito abre e as chamadas subsequentes falham instantaneamente para o fallback local, sem consumir o timeout completo a cada usuário. O circuito fecha automaticamente após um período de recuperação, testando a dependência com uma chamada de sondagem.
+- **Injeção de dependências do FastAPI** aplicada na proteção dos endpoints de governança corporativa, via `Depends(exigir_token_admin)`, validando o cabeçalho `X-PhishGuard-Token` contra a variável de ambiente `PHISHGUARD_ADMIN_TOKEN`.
 
-### 2.3. Camada de Inteligencia Artificial (Dupla Checagem)
+### 2.3. Camada de Inteligência Artificial (Dupla Checagem)
 
-O veredito de phishing e produzido por um pipeline de duas camadas independentes, com fallback automatico entre elas:
+O veredito de phishing é produzido por um pipeline de duas camadas independentes, com fallback automático entre elas:
 
-**Camada 1 - Motor Estatistico (local, sincrono, sem dependencia de rede)**
-Ensemble de dois classificadores complementares, treinados sobre uma representacao vetorial TF-IDF do texto do e-mail:
+**Camada 1 - Motor Estatístico (local, síncrono, sem dependência de rede)**
+Ensemble de dois classificadores complementares, treinados sobre uma representação vetorial TF-IDF do texto do e-mail:
 
-- **Random Forest**: reduz variancia por meio de votacao entre multiplas arvores de decisao treinadas sobre subconjuntos aleatorios de dados.
-- **XGBoost**: correcao sequencial de erro via gradient boosting, com maior sensibilidade a padroes lexicais sutis de engenharia social.
+- **Random Forest**: reduz variância por meio de votação entre múltiplas árvores de decisão treinadas sobre subconjuntos aleatórios de dados.
+- **XGBoost**: correção sequencial de erro via gradient boosting, com maior sensibilidade a padrões lexicais sutis de engenharia social.
 
-O score final e a media aritmetica das probabilidades de classe positiva (`phishing`) emitidas pelos dois modelos, ponderado com uma camada de reputacao previa (Camada 0) que zera o score quando o dominio do remetente pertence a uma whitelist de dominios corporativos e institucionais verificados.
+O score final é a média aritmética das probabilidades de classe positiva (`phishing`) emitidas pelos dois modelos, ponderado com uma camada de reputação prévia (Camada 0) que zera o score quando o domínio do remetente pertence a uma whitelist de domínios corporativos e institucionais verificados.
 
 **Camada 2 - Motor Contextual (Google Gemini, via `google-genai` SDK)**
-Aciona o modelo Gemini com uma instrucao de sistema especializada em analise de engenharia social e verificacao de legitimidade de dominio, recebendo exclusivamente o texto ja processado pelo modulo de anonimizacao preventiva (`privacidade.py`). A resposta e validada estruturalmente contra um schema Pydantic (`VereditoGemini`), garantindo que o veredito (`is_phishing_real`) e a explicacao textual retornada sejam sempre consumiveis de forma previsivel pelo restante do sistema.
+Aciona o modelo Gemini com uma instrução de sistema especializada em análise de engenharia social e verificação de legitimidade de domínio, recebendo exclusivamente o texto já processado pelo módulo de anonimização preventiva (`privacidade.py`). A resposta é validada estruturalmente contra um schema Pydantic (`VereditoGemini`), garantindo que o veredito (`is_phishing_real`) e a explicação textual retornada sejam sempre consumíveis de forma previsível pelo restante do sistema.
 
-Quando a Camada 2 esta indisponivel (circuito aberto, timeout esgotado ou chave de API ausente), o sistema degrada de forma controlada para o veredito da Camada 1, sinalizando ao usuario o nivel de alerta `ATENCAO` (analise parcial) em vez de `CRITICO` ou `SEGURO`, preservando transparencia sobre a origem da decisao.
+Quando a Camada 2 está indisponível (circuito aberto, timeout esgotado ou chave de API ausente), o sistema degrada de forma controlada para o veredito da Camada 1, sinalizando ao usuário o nível de alerta `ATENÇÃO` (análise parcial) em vez de `CRÍTICO` ou `SEGURO`, preservando transparência sobre a origem da decisão.
 
-### 2.4. Camada de Persistencia (PostgreSQL / Azure)
+### 2.4. Camada de Persistência (PostgreSQL / Azure)
 
-Implementada em `persistencia.py`, e o unico modulo do sistema com permissao de escrita no banco de dados, hospedado em Azure Database for PostgreSQL. Essa centralizacao e uma decisao arquitetural deliberada: torna a garantia de retencao zero auditavel por inspecao de um unico arquivo, em vez de exigir varredura de todo o codigo-fonte.
+Implementada em `persistencia.py`, é o único módulo do sistema com permissão de escrita no banco de dados, hospedado em Azure Database for PostgreSQL. Essa centralização é uma decisão arquitetural deliberada: torna a garantia de retenção zero auditável por inspeção de um único arquivo, em vez de exigir varredura de todo o código-fonte.
 
-Caracteristicas tecnicas:
+Características técnicas:
 
-- **Pool de conexoes** (`ThreadedConnectionPool`), eliminando o custo de estabelecer uma nova conexao TCP/TLS contra o Azure a cada requisicao.
-- **Escrita assincrona fora do caminho critico**: o evento de telemetria e agendado como uma tarefa assincrona apos a resposta ja ter sido montada, garantindo que uma eventual lentidao do banco de dados jamais aumente a latencia percebida pelo usuario final.
-- **Degradacao graciosa**: a indisponibilidade do banco de dados desativa a telemetria e os paineis de governanca, mas nunca interrompe a analise de seguranca do usuario.
-- **Contrato de dados restritivo por construcao**: o dataclass `EventoTelemetria` define exaustivamente os campos que podem ser persistidos, todos eles metadados agregados (canal, veredito, score, dominio, hashes pseudonimizados, contadores). Nao existe, em nenhum ponto do codigo, um caminho de escrita que aceite texto livre proveniente do usuario.
+- **Pool de conexões** (`ThreadedConnectionPool`), eliminando o custo de estabelecer uma nova conexão TCP/TLS contra o Azure a cada requisição.
+- **Escrita assíncrona fora do caminho crítico**: o evento de telemetria é agendado como uma tarefa assíncrona após a resposta já ter sido montada, garantindo que uma eventual lentidão do banco de dados jamais aumente a latência percebida pelo usuário final.
+- **Degradação graciosa**: a indisponibilidade do banco de dados desativa a telemetria e os painéis de governança, mas nunca interrompe a análise de segurança do usuário.
+- **Contrato de dados restritivo por construção**: o dataclass `EventoTelemetria` define exaustivamente os campos que podem ser persistidos, todos eles metadados agregados (canal, veredito, score, domínio, hashes pseudonimizados, contadores). Não existe, em nenhum ponto do código, um caminho de escrita que aceite texto livre proveniente do usuário.
 
 ---
 
 ## 3. Privacidade e Conformidade (LGPD by Design)
 
-O principio central da arquitetura de dados do PhishGuard e enunciado da seguinte forma:
+O princípio central da arquitetura de dados do PhishGuard é enunciado da seguinte forma:
 
-> O conteudo integral de uma mensagem processada pelo sistema jamais e persistido em qualquer camada de armazenamento permanente.
+> O conteúdo integral de uma mensagem processada pelo sistema jamais é persistido em qualquer camada de armazenamento permanente.
 
-Essa garantia nao e uma politica declarada em documento juridico isolado; ela e imposta estruturalmente pelo codigo, atraves de tres mecanismos concretos, implementados no modulo `privacidade.py` e reforcados por `persistencia.py`.
+Essa garantia não é uma política declarada em documento jurídico isolado; ela é imposta estruturalmente pelo código, através de três mecanismos concretos, implementados no módulo `privacidade.py` e reforçados por `persistencia.py`.
 
-### 3.1. Arquitetura de Retencao Zero (Zero-Retention)
+### 3.1. Arquitetura de Retenção Zero (Zero-Retention)
 
-O corpo do e-mail e as mensagens trocadas no hub conversacional existem exclusivamente na memoria volatil do processo do servidor, pelo tempo estrito de execucao da requisicao HTTP que os recebeu. Ao termino da resposta, a variavel que contem o texto sai de escopo e e reclamada pelo coletor de lixo do interpretador Python; nenhuma rotina do sistema grava esse conteudo em disco, em log ou em qualquer tabela do banco de dados.
+O corpo do e-mail e as mensagens trocadas no hub conversacional existem exclusivamente na memória volátil do processo do servidor, pelo tempo estrito de execução da requisição HTTP que os recebeu. Ao término da resposta, a variável que contém o texto sai de escopo e é reclamada pelo coletor de lixo do interpretador Python; nenhuma rotina do sistema grava esse conteúdo em disco, em log ou em qualquer tabela do banco de dados.
 
-A tabela `interacoes_hub`, unica tabela de telemetria do sistema, armazena apenas: canal de origem, data e hora do evento, veredito de risco, score numerico, nivel de alerta, tipo de conta (B2B/B2C), hashes pseudonimizados de conta e organizacao, dominio do remetente (metadado tecnico, nao dado pessoal isolado), indicador de uso da dupla checagem, contagem de dados sensiveis mascarados e latencia de processamento. Colunas legadas de versoes anteriores (`mensagem_usuario`, `resposta_bot`) sao mantidas apenas para compatibilidade de schema com bases ja provisionadas, porem o sistema atual nunca escreve nelas; o expurgo desse conteudo historico e tratado no script de migracao descrito na Secao 7.
+A tabela `interacoes_hub`, única tabela de telemetria do sistema, armazena apenas: canal de origem, data e hora do evento, veredito de risco, score numérico, nível de alerta, tipo de conta (B2B/B2C), hashes pseudonimizados de conta e organização, domínio do remetente (metadado técnico, não dado pessoal isolado), indicador de uso da dupla checagem, contagem de dados sensíveis mascarados e latência de processamento. Colunas legadas de versões anteriores (`mensagem_usuario`, `resposta_bot`) são mantidas apenas para compatibilidade de schema com bases já provisionadas, porém o sistema atual nunca escreve nelas; o expurgo desse conteúdo histórico é tratado no script de migração descrito na Seção 7.
 
-### 3.2. Modulo de PII Masking (`privacidade.py`)
+### 3.2. Módulo de PII Masking (`privacidade.py`)
 
-Antes de qualquer texto do usuario ser enviado ao modelo Gemini (Camada 2), o sistema executa obrigatoriamente a funcao `mascarar_pii()`, que aplica um catalogo declarativo de treze regras de deteccao e substituicao de Dados Pessoais Identificaveis (PII), avaliadas em ordem de especificidade decrescente para evitar que um padrao generico consuma parcialmente um padrao mais especifico:
+Antes de qualquer texto do usuário ser enviado ao modelo Gemini (Camada 2), o sistema executa obrigatoriamente a função `mascarar_pii()`, que aplica um catálogo declarativo de treze regras de detecção e substituição de Dados Pessoais Identificáveis (PII), avaliadas em ordem de especificidade decrescente para evitar que um padrão genérico consuma parcialmente um padrão mais específico:
 
-| Regra | Dado detectado | Validacao aplicada | Substituicao |
+| Regra | Dado detectado | Validação aplicada | Substituição |
 |---|---|---|---|
-| Credencial | Senhas, tokens, chaves de API, codigos de verificacao | Marcador textual precedente (`senha:`, `token=`) | `[CREDENCIAL_MASCARADA]` |
-| Linha digitavel | Boletos bancarios (44 a 48 digitos) | Comprimento numerico | `[LINHA_DIGITAVEL_MASCARADA]` |
-| Cartao de credito/debito | Numeros de 13 a 19 digitos | **Algoritmo de Luhn (ISO/IEC 7812)** | `[CARTAO_MASCARADO]` |
-| CNPJ | Cadastro Nacional de Pessoa Juridica | Digitos verificadores oficiais | `[CNPJ_MASCARADO]` |
-| CPF | Cadastro de Pessoa Fisica | Digitos verificadores da Receita Federal | `[CPF_MASCARADO]` |
-| Chave Pix aleatoria | Identificador UUID v4 | Formato RFC 4122 | `[CHAVE_PIX_MASCARADA]` |
-| Pix copia-e-cola | Codigo BR Code / EMV | Prefixo de payload EMV | `[PIX_COPIA_E_COLA_MASCARADO]` |
-| Dados bancarios | Agencia e conta corrente | Marcadores contextuais | `[DADOS_BANCARIOS_MASCARADOS]` |
-| E-mail pessoal | Parte local do endereco de e-mail | - | `[USUARIO_MASCARADO]@dominio-preservado` |
-| Telefone | Numeros brasileiros fixos e moveis | Padrao de DDD/DDI | `[TELEFONE_MASCARADO]` |
-| CEP | Codigo de Enderecamento Postal | Formato numerico | `[CEP_MASCARADO]` |
-| Documentos | RG, CNH, passaporte, titulo de eleitor | Marcador textual precedente | `[DOCUMENTO_MASCARADO]` |
+| Credencial | Senhas, tokens, chaves de API, códigos de verificação | Marcador textual precedente (`senha:`, `token=`) | `[CREDENCIAL_MASCARADA]` |
+| Linha digitável | Boletos bancários (44 a 48 dígitos) | Comprimento numérico | `[LINHA_DIGITAVEL_MASCARADA]` |
+| Cartão de crédito/débito | Números de 13 a 19 dígitos | **Algoritmo de Luhn (ISO/IEC 7812)** | `[CARTAO_MASCARADO]` |
+| CNPJ | Cadastro Nacional de Pessoa Jurídica | Dígitos verificadores oficiais | `[CNPJ_MASCARADO]` |
+| CPF | Cadastro de Pessoa Física | Dígitos verificadores da Receita Federal | `[CPF_MASCARADO]` |
+| Chave Pix aleatória | Identificador UUID v4 | Formato RFC 4122 | `[CHAVE_PIX_MASCARADA]` |
+| Pix copia-e-cola | Código BR Code / EMV | Prefixo de payload EMV | `[PIX_COPIA_E_COLA_MASCARADO]` |
+| Dados bancários | Agência e conta corrente | Marcadores contextuais | `[DADOS_BANCARIOS_MASCARADOS]` |
+| E-mail pessoal | Parte local do endereço de e-mail | - | `[USUARIO_MASCARADO]@dominio-preservado` |
+| Telefone | Números brasileiros fixos e móveis | Padrão de DDD/DDI | `[TELEFONE_MASCARADO]` |
+| CEP | Código de Endereçamento Postal | Formato numérico | `[CEP_MASCARADO]` |
+| Documentos | RG, CNH, passaporte, título de eleitor | Marcador textual precedente | `[DOCUMENTO_MASCARADO]` |
 | Data de nascimento | Data precedida de marcador contextual | Marcador textual precedente | `[DATA_NASCIMENTO_MASCARADA]` |
 
-**Decisao tecnica intencional - preservacao de dominios**: ao contrario do endereco de e-mail completo, o dominio do remetente (por exemplo, `bradesco-seguranca.xyz`) e deliberadamente preservado apos o mascaramento. Essa preservacao e o alicerce tecnico da deteccao de spoofing e de dominios sosias: sem o dominio intacto, a Camada 2 perderia a capacidade de comparar o remetente contra a marca legitima citada no corpo da mensagem. O mesmo raciocinio se aplica a URLs completas, que sobrevivem integralmente ao processo de mascaramento por serem o artefato tecnico central de identificacao de phishing.
+**Decisão técnica intencional - preservação de domínios**: ao contrário do endereço de e-mail completo, o domínio do remetente (por exemplo, `bradesco-seguranca.xyz`) é deliberadamente preservado após o mascaramento. Essa preservação é o alicerce técnico da detecção de spoofing e de domínios sósias: sem o domínio intacto, a Camada 2 perderia a capacidade de comparar o remetente contra a marca legítima citada no corpo da mensagem. O mesmo raciocínio se aplica a URLs completas, que sobrevivem integralmente ao processo de mascaramento por serem o artefato técnico central de identificação de phishing.
 
-**Validacao por algoritmo, nao apenas por formato**: numeros de cartao sao confirmados pelo algoritmo de Luhn e CPF/CNPJ pelos respectivos digitos verificadores oficiais antes de serem mascarados, reduzindo falsos positivos que destruiriam numeros de pedido, protocolos ou codigos de rastreio sem qualquer ganho real de privacidade.
+**Validação por algoritmo, não apenas por formato**: números de cartão são confirmados pelo algoritmo de Luhn e CPF/CNPJ pelos respectivos dígitos verificadores oficiais antes de serem mascarados, reduzindo falsos positivos que destruiriam números de pedido, protocolos ou códigos de rastreio sem qualquer ganho real de privacidade.
 
-**Falha fechada por padrao**: caso qualquer regra de mascaramento produza uma excecao nao tratada durante a execucao, o sistema descarta o texto original por completo e o substitui pela tag generica `[DADOS_CONFIDENCIAIS]`, privilegiando a perda de uma analise a exposicao acidental de um dado sensivel.
+**Falha fechada por padrão**: caso qualquer regra de mascaramento produza uma exceção não tratada durante a execução, o sistema descarta o texto original por completo e o substitui pela tag genérica `[DADOS_CONFIDENCIAIS]`, privilegiando a perda de uma análise à exposição acidental de um dado sensível.
 
-### 3.3. Pseudonimizacao com Sal Criptografico
+### 3.3. Pseudonimização com Sal Criptográfico
 
-Identificadores de conta (`id_conta`) e de organizacao (`organizacao`) jamais sao persistidos em texto claro. Antes de qualquer gravacao, sao convertidos pela funcao `pseudonimizar()` em um hash `HMAC-SHA256`, calculado com um sal secreto definido pela variavel de ambiente `PHISHGUARD_SAL_PSEUDONIMO` e escopado pelo contexto de uso (`conta` ou `tenant`), impedindo correlacao cruzada entre hashes de escopos distintos gerados a partir do mesmo valor original.
+Identificadores de conta (`id_conta`) e de organização (`organizacao`) jamais são persistidos em texto claro. Antes de qualquer gravação, são convertidos pela função `pseudonimizar()` em um hash `HMAC-SHA256`, calculado com um sal secreto definido pela variável de ambiente `PHISHGUARD_SAL_PSEUDONIMO` e escopado pelo contexto de uso (`conta` ou `tenant`), impedindo correlação cruzada entre hashes de escopos distintos gerados a partir do mesmo valor original.
 
-Sem a posse do sal, mantido exclusivamente na infraestrutura do servidor e fora do alcance de qualquer painel ou API publica, a reversao do hash para o identificador original e computacionalmente inviavel. Essa e a base tecnica que permite ao Painel Enterprise (B2B) exibir metricas de exposicao por colaborador sem jamais revelar a identidade da pessoa ao gestor que consulta o painel.
+Sem a posse do sal, mantido exclusivamente na infraestrutura do servidor e fora do alcance de qualquer painel ou API pública, a reversão do hash para o identificador original é computacionalmente inviável. Essa é a base técnica que permite ao Painel Enterprise (B2B) exibir métricas de exposição por colaborador sem jamais revelar a identidade da pessoa ao gestor que consulta o painel.
 
 ### 3.4. Trilha de Auditoria Anonimizada e Direitos do Titular
 
-O endpoint `GET /api/privacidade/auditoria` executa uma autoauditoria em tempo de execucao, consultando o schema real do banco de dados e retornando se ha ou nao conteudo residual nas colunas legadas, permitindo que um auditor externo verifique a conformidade sem depender de acesso direto a infraestrutura. O endpoint `DELETE /api/privacidade/meus-dados` implementa o direito de eliminacao previsto no Artigo 18, VI, da LGPD; como nenhum conteudo e armazenado, a operacao ja satisfaz o direito por construcao, restando apenas a remocao dos metadados residuais associados ao hash do titular.
+O endpoint `GET /api/privacidade/auditoria` executa uma autoauditoria em tempo de execução, consultando o schema real do banco de dados e retornando se há ou não conteúdo residual nas colunas legadas, permitindo que um auditor externo verifique a conformidade sem depender de acesso direto à infraestrutura. O endpoint `DELETE /api/privacidade/meus-dados` implementa o direito de eliminação previsto no Artigo 18, VI, da LGPD; como nenhum conteúdo é armazenado, a operação já satisfaz o direito por construção, restando apenas a remoção dos metadados residuais associados ao hash do titular.
 
-A documentacao tecnica completa desta arquitetura, incluindo as decisoes de projeto registradas como ADRs (Architecture Decision Records), esta disponivel em [`docs/ARQUITETURA_LGPD.md`](docs/ARQUITETURA_LGPD.md).
+A documentação técnica completa desta arquitetura, incluindo as decisões de projeto registradas como ADRs (Architecture Decision Records), está disponível em [`docs/ARQUITETURA_LGPD.md`](docs/ARQUITETURA_LGPD.md).
 
 ---
 
-## 4. Estrutura do Repositorio e Modulos
+## 4. Estrutura do Repositório e Módulos
 
 ```text
 PhishGuard/
 ├── api.py                          Barramento FastAPI - orquestra as camadas 0, 1 e 2
-├── privacidade.py                  PII Masking, pseudonimizacao e manifesto publico de LGPD
-├── persistencia.py                 Unico ponto de escrita no banco de dados (somente metadados)
+├── privacidade.py                  PII Masking, pseudonimização e manifesto público de LGPD
+├── persistencia.py                 Único ponto de escrita no banco de dados (somente metadados)
 ├── resiliencia.py                  Timeout, retry com backoff/jitter e circuit breaker
-├── diagnostico.py                  Script utilitario de validacao de conexao IMAP
+├── diagnostico.py                  Script utilitário de validação de conexão IMAP
 │
-├── extensao_chrome/                Extensao de navegador Manifest V3
-│   ├── manifest.json               Declaracao de permissoes, hosts e content scripts
-│   ├── background.js               Service Worker - proxy de rede resiliente e configuracao
-│   ├── content.js                  Extracao de DOM, banner de veredito e modal de privacidade
-│   ├── popup.html / popup.js       Interface de configuracao (Protecao / Privacidade / Conta)
+├── extensao_chrome/                Extensão de navegador Manifest V3
+│   ├── manifest.json               Declaração de permissões, hosts e content scripts
+│   ├── background.js               Service Worker - proxy de rede resiliente e configuração
+│   ├── content.js                  Extração de DOM, banner de veredito e modal de privacidade
+│   ├── popup.html / popup.js       Interface de configuração (Proteção / Privacidade / Conta)
 │
 ├── painel_soc/
-│   └── index.html                  Painel Enterprise (B2B) - governanca e auditoria corporativa
+│   └── index.html                  Painel Enterprise (B2B) - governança e auditoria corporativa
 │
 ├── painel_pessoal/
-│   └── index.html                  Painel Personal (B2C) - metricas individuais do titular
+│   └── index.html                  Painel Personal (B2C) - métricas individuais do titular
 │
 ├── hub_conversacional/
-│   └── simulador_whatsapp.html     Simulador do canal WhatsApp para validacao do fluxo conversacional
+│   └── simulador_whatsapp.html     Simulador do canal WhatsApp para validação do fluxo conversacional
 │
 ├── site_comercial/
-│   └── index.html                  Landing page institucional com webchat hibrido (vendas + analise)
+│   └── index.html                  Landing page institucional com webchat híbrido (vendas + análise)
 │
-├── models/                         Artefatos binarios (.pkl) dos modelos de Machine Learning treinados
+├── models/                         Artefatos binários (.pkl) dos modelos de Machine Learning treinados
 │   ├── vetorizador.pkl             Vetorizador TF-IDF
 │   ├── random_forest.pkl           Modelo Random Forest treinado
 │   └── xgboost.pkl                 Modelo XGBoost treinado
@@ -209,129 +209,129 @@ PhishGuard/
 ├── data/                           Datasets utilizados no treinamento dos modelos
 │
 ├── src/                            Ecossistema desktop legado e pipeline de treinamento de ML
-│   ├── config.py                   Parametrizacao global
-│   ├── email_client.py             Cliente de sessao IMAP/POP3
-│   ├── gui.py                      Interface grafica da aplicacao desktop
-│   ├── ml_engine.py                Pipeline de treinamento e exportacao dos modelos
-│   └── main.py                     Ponto de entrada da aplicacao desktop
+│   ├── config.py                   Parametrização global
+│   ├── email_client.py             Cliente de sessão IMAP/POP3
+│   ├── gui.py                      Interface gráfica da aplicação desktop
+│   ├── ml_engine.py                Pipeline de treinamento e exportação dos modelos
+│   └── main.py                     Ponto de entrada da aplicação desktop
 │
 ├── scripts/
-│   ├── gerar_dataset_ptbr.py       Geracao do dataset em portugues brasileiro
-│   └── migrar_lgpd_zero_retencao.py  Diagnostico e expurgo de conteudo legado no banco de dados
+│   ├── gerar_dataset_ptbr.py       Geração do dataset em português brasileiro
+│   └── migrar_lgpd_zero_retencao.py  Diagnóstico e expurgo de conteúdo legado no banco de dados
 │
 ├── tests/
-│   └── test_conformidade_lgpd.py   Suite de testes que valida as garantias de privacidade como codigo
+│   └── test_conformidade_lgpd.py   Suíte de testes que valida as garantias de privacidade como código
 │
 ├── docs/
-│   └── ARQUITETURA_LGPD.md         Documento de referencia tecnica para auditoria de privacidade
+│   └── ARQUITETURA_LGPD.md         Documento de referência técnica para auditoria de privacidade
 │
-├── .env.example                    Modelo de variaveis de ambiente, sem segredos reais
-├── .env                            Variaveis de ambiente reais (nao versionado)
-├── .gitignore                      Exclusoes de controle de versao
-└── requirements.txt                Dependencias Python do projeto
+├── .env.example                    Modelo de variáveis de ambiente, sem segredos reais
+├── .env                            Variáveis de ambiente reais (não versionado)
+├── .gitignore                      Exclusões de controle de versão
+└── requirements.txt                Dependências Python do projeto
 ```
 
-### 4.1. Descricao Funcional dos Modulos Centrais
+### 4.1. Descrição Funcional dos Módulos Centrais
 
 **`api.py`**
-Ponto de entrada da aplicacao FastAPI. Define os contratos de entrada e saida via modelos Pydantic, orquestra a chamada sequencial das camadas de deteccao, aplica o middleware de seguranca de rede e expoe a totalidade dos endpoints REST consumidos pela extensao, pelos paineis e pelo hub conversacional.
+Ponto de entrada da aplicação FastAPI. Define os contratos de entrada e saída via modelos Pydantic, orquestra a chamada sequencial das camadas de detecção, aplica o middleware de segurança de rede e expõe a totalidade dos endpoints REST consumidos pela extensão, pelos painéis e pelo hub conversacional.
 
 **`privacidade.py`**
-Modulo autocontido, sem dependencia de rede ou de banco de dados, responsavel por toda a logica de anonimizacao preventiva, validacao de dados sensiveis (Luhn, digitos verificadores de CPF/CNPJ) e pseudonimizacao criptografica. Tambem centraliza o manifesto publico de transparencia (`MANIFESTO_LGPD`), consumido pela extensao e pelos paineis.
+Módulo autocontido, sem dependência de rede ou de banco de dados, responsável por toda a lógica de anonimização preventiva, validação de dados sensíveis (Luhn, dígitos verificadores de CPF/CNPJ) e pseudonimização criptográfica. Também centraliza o manifesto público de transparência (`MANIFESTO_LGPD`), consumido pela extensão e pelos painéis.
 
 **`persistencia.py`**
-Camada de acesso a dados isolada, responsavel pelo pool de conexoes, pela definicao idempotente do schema e por todas as consultas agregadas consumidas pelos dois paineis (resumo estatistico, serie temporal, ranking de dominios sob risco, colaboradores em risco e distribuicao por canal).
+Camada de acesso a dados isolada, responsável pelo pool de conexões, pela definição idempotente do schema e por todas as consultas agregadas consumidas pelos dois painéis (resumo estatístico, série temporal, ranking de domínios sob risco, colaboradores em risco e distribuição por canal).
 
 **`resiliencia.py`**
-Utilitario generico de resiliencia, desacoplado do dominio de negocio do PhishGuard, reaproveitavel para qualquer chamada assincrona a uma dependencia externa instavel.
+Utilitário genérico de resiliência, desacoplado do domínio de negócio do PhishGuard, reaproveitável para qualquer chamada assíncrona a uma dependência externa instável.
 
 ---
 
-## 5. Guia de Instalacao e Configuracao de Ambiente
+## 5. Guia de Instalação e Configuração de Ambiente
 
-### 5.1. Requisitos Previos
+### 5.1. Requisitos Prévios
 
 - Python 3.11 ou superior.
-- Instancia de PostgreSQL acessivel (recomendado: Azure Database for PostgreSQL); a ausencia dessa dependencia nao impede a subida do servidor, apenas desativa a telemetria e os paineis de governanca.
-- Chave de API valida do Google Gemini (Google AI Studio ou Google Cloud), para habilitar a Camada 2 de analise contextual.
-- Navegador baseado em Chromium (Google Chrome ou Microsoft Edge) para instalacao da extensao.
+- Instância de PostgreSQL acessível (recomendado: Azure Database for PostgreSQL); a ausência dessa dependência não impede a subida do servidor, apenas desativa a telemetria e os painéis de governança.
+- Chave de API válida do Google Gemini (Google AI Studio ou Google Cloud), para habilitar a Camada 2 de análise contextual.
+- Navegador baseado em Chromium (Google Chrome ou Microsoft Edge) para instalação da extensão.
 
-### 5.2. Criacao do Ambiente Virtual
+### 5.2. Criação do Ambiente Virtual
 
 ```bash
 python -m venv venv
 ```
 
-Ativacao no Windows (PowerShell):
+Ativação no Windows (PowerShell):
 
 ```bash
 .\venv\Scripts\Activate.ps1
 ```
 
-Ativacao no Linux ou macOS:
+Ativação no Linux ou macOS:
 
 ```bash
 source venv/bin/activate
 ```
 
-### 5.3. Instalacao de Dependencias
+### 5.3. Instalação de Dependências
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 5.4. Configuracao das Variaveis de Ambiente
+### 5.4. Configuração das Variáveis de Ambiente
 
-O arquivo `.env.example` documenta a totalidade das variaveis suportadas pelo sistema. Copie-o para `.env` e preencha os valores reais:
+O arquivo `.env.example` documenta a totalidade das variáveis suportadas pelo sistema. Copie-o para `.env` e preencha os valores reais:
 
 ```bash
 cp .env.example .env
 ```
 
-| Variavel | Obrigatoriedade | Efeito quando ausente |
+| Variável | Obrigatoriedade | Efeito quando ausente |
 |---|---|---|
-| `GEMINI_API_KEY` | Recomendada | A Camada 2 e desativada; o sistema opera apenas com a Camada 1 |
-| `DATABASE_URL` | Recomendada | Telemetria e paineis desativados; a analise de seguranca continua ativa |
-| `PHISHGUARD_SAL_PSEUDONIMO` | Recomendada em producao | Um sal efemero e gerado por processo; os hashes de conta perdem estabilidade entre reinicios do servidor |
-| `PHISHGUARD_DPO_CONTATO` | Opcional | Endereco de contato exibido no manifesto publico de privacidade |
-| `PHISHGUARD_ADMIN_TOKEN` | Recomendada em producao | Os endpoints de governanca corporativa (B2B) ficam abertos sem autenticacao, aceitavel apenas em ambiente de desenvolvimento |
-| `PHISHGUARD_LIMIAR_CAMADA_1` | Opcional | Assume o valor padrao `0.35` |
-| `PHISHGUARD_GEMINI_MODEL` | Opcional | Assume o modelo padrao configurado no codigo |
+| `GEMINI_API_KEY` | Recomendada | A Camada 2 é desativada; o sistema opera apenas com a Camada 1 |
+| `DATABASE_URL` | Recomendada | Telemetria e painéis desativados; a análise de segurança continua ativa |
+| `PHISHGUARD_SAL_PSEUDONIMO` | Recomendada em produção | Um sal efêmero é gerado por processo; os hashes de conta perdem estabilidade entre reinícios do servidor |
+| `PHISHGUARD_DPO_CONTATO` | Opcional | Endereço de contato exibido no manifesto público de privacidade |
+| `PHISHGUARD_ADMIN_TOKEN` | Recomendada em produção | Os endpoints de governança corporativa (B2B) ficam abertos sem autenticação, aceitável apenas em ambiente de desenvolvimento |
+| `PHISHGUARD_LIMIAR_CAMADA_1` | Opcional | Assume o valor padrão `0.35` |
+| `PHISHGUARD_GEMINI_MODEL` | Opcional | Assume o modelo padrão configurado no código |
 | `PHISHGUARD_GEMINI_TIMEOUT` | Opcional | Assume `12` segundos |
 | `PHISHGUARD_GEMINI_TENTATIVAS` | Opcional | Assume `2` tentativas |
 | `PHISHGUARD_DB_POOL_MIN` / `PHISHGUARD_DB_POOL_MAX` | Opcional | Assumem `1` e `8`, respectivamente |
-| `PHISHGUARD_CORS_ORIGENS` | Opcional | Origens adicionais liberadas no CORS, alem das ja aceitas por padrao |
+| `PHISHGUARD_CORS_ORIGENS` | Opcional | Origens adicionais liberadas no CORS, além das já aceitas por padrão |
 | `PHISHGUARD_LOG_LEVEL` | Opcional | Assume `INFO` |
 
-Geracao de um sal criptografico forte para producao:
+Geração de um sal criptográfico forte para produção:
 
 ```bash
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-### 5.5. Inicializacao do Servidor (Uvicorn)
+### 5.5. Inicialização do Servidor (Uvicorn)
 
 ```bash
 python -m uvicorn api:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-A flag `--reload` deve ser omitida em ambiente de producao. Apos a subida do processo:
+A flag `--reload` deve ser omitida em ambiente de produção. Após a subida do processo:
 
-- Verificacao de prontidao e estado das camadas: `http://localhost:8000/health`
-- Documentacao interativa (Swagger UI, gerada automaticamente pelo FastAPI): `http://localhost:8000/docs`
+- Verificação de prontidão e estado das camadas: `http://localhost:8000/health`
+- Documentação interativa (Swagger UI, gerada automaticamente pelo FastAPI): `http://localhost:8000/docs`
 
-### 5.6. Instalacao da Extensao em Modo Desenvolvedor
+### 5.6. Instalação da Extensão em Modo Desenvolvedor
 
 1. No navegador, acesse `chrome://extensions` (Chrome) ou `edge://extensions` (Edge).
-2. Ative a opcao **Modo do desenvolvedor**, localizada no canto superior direito da pagina.
-3. Selecione **Carregar sem compactacao** (*Load unpacked*).
-4. Aponte para o diretorio `extensao_chrome/` deste repositorio.
-5. Abra o popup da extensao clicando em seu icone na barra de ferramentas, acesse a aba **Conta**, selecione o perfil desejado (Personal ou Enterprise) e confirme o endereco do endpoint da API.
-6. Abra qualquer e-mail no Gmail ou no Outlook Web: o banner de veredito sera injetado automaticamente acima do corpo da mensagem.
+2. Ative a opção **Modo do desenvolvedor**, localizada no canto superior direito da página.
+3. Selecione **Carregar sem compactação** (*Load unpacked*).
+4. Aponte para o diretório `extensao_chrome/` deste repositório.
+5. Abra o popup da extensão clicando em seu ícone na barra de ferramentas, acesse a aba **Conta**, selecione o perfil desejado (Personal ou Enterprise) e confirme o endereço do endpoint da API.
+6. Abra qualquer e-mail no Gmail ou no Outlook Web: o banner de veredito será injetado automaticamente acima do corpo da mensagem.
 
-### 5.7. Execucao dos Paineis Front-end
+### 5.7. Execução dos Painéis Front-end
 
-Os paineis realizam chamadas `fetch` a API e, por restricao de seguranca do navegador, nao podem ser abertos diretamente via protocolo `file://`. Sirva o diretorio raiz por HTTP:
+Os painéis realizam chamadas `fetch` à API e, por restrição de segurança do navegador, não podem ser abertos diretamente via protocolo `file://`. Sirva o diretório raiz por HTTP:
 
 ```bash
 python -m http.server 5500
@@ -344,19 +344,19 @@ python -m http.server 5500
 
 ---
 
-## 6. Documentacao de Endpoints da API
+## 6. Documentação de Endpoints da API
 
-Todos os endpoints retornam JSON codificado em UTF-8 com preservacao integral de acentuacao (`ensure_ascii=False`) e carregam o cabecalho `X-PhishGuard-Data-Retention: none` em toda resposta.
+Todos os endpoints retornam JSON codificado em UTF-8 com preservação integral de acentuação (`ensure_ascii=False`) e carregam o cabeçalho `X-PhishGuard-Data-Retention: none` em toda resposta.
 
 ### `POST /analisar-email`
 
-Endpoint principal consumido pela extensao de navegador. Realiza a analise stateless de um e-mail: aplica a anonimizacao preventiva sobre o assunto e o corpo, calcula o score estatistico da Camada 1 e, quando disponivel, consulta a Camada 2 (Gemini) com o texto ja mascarado.
+Endpoint principal consumido pela extensão de navegador. Realiza a análise stateless de um e-mail: aplica a anonimização preventiva sobre o assunto e o corpo, calcula o score estatístico da Camada 1 e, quando disponível, consulta a Camada 2 (Gemini) com o texto já mascarado.
 
-**Corpo da requisicao:**
+**Corpo da requisição:**
 
 ```json
 {
-  "assunto": "Sua conta sera bloqueada em 24h",
+  "assunto": "Sua conta será bloqueada em 24h",
   "corpo_texto": "Confirme seu CPF e senha em http://exemplo-suspeito.xyz",
   "remetente": "Seguranca <alerta@exemplo-suspeito.xyz>",
   "perfil": "B2C",
@@ -388,13 +388,13 @@ Endpoint principal consumido pela extensao de navegador. Realiza a analise state
 }
 ```
 
-O corpo do e-mail enviado nesta requisicao nunca e persistido; apenas os metadados agregados do resultado sao gravados de forma assincrona apos a resposta ser retornada ao cliente.
+O corpo do e-mail enviado nesta requisição nunca é persistido; apenas os metadados agregados do resultado são gravados de forma assíncrona após a resposta ser retornada ao cliente.
 
 ### `POST /webhook/whatsapp`
 
-Endpoint do hub conversacional para o canal WhatsApp. Recebe uma mensagem de texto livre, aplica a mesma rotina de anonimizacao preventiva e retorna um veredito formatado para exibicao em interface de chat, incluindo emojis e marcacao de negrito compativel com o padrao do WhatsApp.
+Endpoint do hub conversacional para o canal WhatsApp. Recebe uma mensagem de texto livre, aplica a mesma rotina de anonimização preventiva e retorna um veredito formatado para exibição em interface de chat, incluindo emojis e marcação de negrito compatível com o padrão do WhatsApp.
 
-**Corpo da requisicao:**
+**Corpo da requisição:**
 
 ```json
 {
@@ -406,79 +406,79 @@ Endpoint do hub conversacional para o canal WhatsApp. Recebe uma mensagem de tex
 
 ### `POST /webhook/webchat`
 
-Endpoint do hub conversacional para o canal webchat, hospedado no site comercial. Opera em modo hibrido: responde tanto a perguntas comerciais sobre os planos do produto quanto a solicitacoes de analise de risco, alternando de forma dinamica entre os dois papeis conforme o conteudo da mensagem recebida. A classificacao de ameaca exige a presenca de um artefato tecnico analisavel (URL ou dominio) na mensagem original, evitando que perguntas hipoteticas sobre golpes ("isso e phishing?") sejam contabilizadas como ameacas efetivamente bloqueadas nas metricas de governanca.
+Endpoint do hub conversacional para o canal webchat, hospedado no site comercial. Opera em modo híbrido: responde tanto a perguntas comerciais sobre os planos do produto quanto a solicitações de análise de risco, alternando de forma dinâmica entre os dois papéis conforme o conteúdo da mensagem recebida. A classificação de ameaça exige a presença de um artefato técnico analisável (URL ou domínio) na mensagem original, evitando que perguntas hipotéticas sobre golpes ("isso é phishing?") sejam contabilizadas como ameaças efetivamente bloqueadas nas métricas de governança.
 
 ### `GET /api/logs-soc`
 
-Retorna a trilha de auditoria anonimizada mais recente, limitada por parametro de consulta (`limite`, padrao 50, maximo 500). Protegido por token de administracao quando `PHISHGUARD_ADMIN_TOKEN` esta definido. Nenhum campo de conteudo e retornado; a estrutura da resposta contem exclusivamente os metadados definidos no contrato `EventoTelemetria`.
+Retorna a trilha de auditoria anonimizada mais recente, limitada por parâmetro de consulta (`limite`, padrão 50, máximo 500). Protegido por token de administração quando `PHISHGUARD_ADMIN_TOKEN` está definido. Nenhum campo de conteúdo é retornado; a estrutura da resposta contém exclusivamente os metadados definidos no contrato `EventoTelemetria`.
 
 ### `GET /api/privacidade`
 
-Endpoint publico, sem autenticacao, que expoe o manifesto de transparencia (`MANIFESTO_LGPD`): versao vigente da politica, garantias declaradas, bases legais aplicaveis, lista explicita de dados persistidos e de dados nunca persistidos, subprocessadores envolvidos (Google Gemini e Azure Database for PostgreSQL) e contato do encarregado de dados (DPO). Consumido pela extensao e pelos paineis para renderizacao do selo de transparencia.
+Endpoint público, sem autenticação, que expõe o manifesto de transparência (`MANIFESTO_LGPD`): versão vigente da política, garantias declaradas, bases legais aplicáveis, lista explícita de dados persistidos e de dados nunca persistidos, subprocessadores envolvidos (Google Gemini e Azure Database for PostgreSQL) e contato do encarregado de dados (DPO). Consumido pela extensão e pelos painéis para renderização do selo de transparência.
 
 ### Endpoints complementares
 
-| Metodo | Rota | Descricao |
+| Método | Rota | Descrição |
 |---|---|---|
-| `GET` | `/api/metricas/pessoal` | Metricas agregadas do titular, filtradas pelo hash da propria conta (B2C) |
-| `GET` | `/api/metricas/corporativo` | Governanca da organizacao: ranking de dominios, colaboradores em risco, series temporais (B2B, protegido) |
-| `GET` | `/api/privacidade/auditoria` | Autoauditoria de retencao em tempo de execucao (protegido) |
-| `DELETE` | `/api/privacidade/meus-dados` | Execucao do direito de eliminacao previsto no Artigo 18, VI, da LGPD |
-| `GET` | `/health` | Prontidao do servico, estado das camadas de IA e diagnostico dos circuit breakers |
+| `GET` | `/api/metricas/pessoal` | Métricas agregadas do titular, filtradas pelo hash da própria conta (B2C) |
+| `GET` | `/api/metricas/corporativo` | Governança da organização: ranking de domínios, colaboradores em risco, séries temporais (B2B, protegido) |
+| `GET` | `/api/privacidade/auditoria` | Autoauditoria de retenção em tempo de execução (protegido) |
+| `DELETE` | `/api/privacidade/meus-dados` | Execução do direito de eliminação previsto no Artigo 18, VI, da LGPD |
+| `GET` | `/health` | Prontidão do serviço, estado das camadas de IA e diagnóstico dos circuit breakers |
 
 ---
 
-## 7. Testes, Migracao e Validacao
+## 7. Testes, Migração e Validação
 
-### 7.1. Suite de Testes de Conformidade LGPD
+### 7.1. Suíte de Testes de Conformidade LGPD
 
-O arquivo `tests/test_conformidade_lgpd.py` implementa a conformidade de privacidade como codigo executavel: cada garantia declarada na Secao 3 deste documento corresponde a uma ou mais asserções automatizadas, cobrindo deteccao de PII por categoria, estabilidade e irreversibilidade da pseudonimizacao, e ausencia estrutural de campos de conteudo no contrato de persistencia.
+O arquivo `tests/test_conformidade_lgpd.py` implementa a conformidade de privacidade como código executável: cada garantia declarada na Seção 3 deste documento corresponde a uma ou mais asserções automatizadas, cobrindo detecção de PII por categoria, estabilidade e irreversibilidade da pseudonimização, e ausência estrutural de campos de conteúdo no contrato de persistência.
 
-Execucao via `pytest`:
+Execução via `pytest`:
 
 ```bash
 python -m pytest tests -v
 ```
 
-Execucao direta, sem dependencia de `pytest` instalado:
+Execução direta, sem dependência de `pytest` instalado:
 
 ```bash
 python tests/test_conformidade_lgpd.py
 ```
 
-### 7.2. Migracao e Expurgo de Dados Legados
+### 7.2. Migração e Expurgo de Dados Legados
 
-Instalacoes provisionadas a partir de versoes anteriores do PhishGuard podem conter registros historicos com conteudo de mensagem armazenado em texto puro nas colunas legadas `mensagem_usuario` e `resposta_bot`. O sistema atual interrompe imediatamente qualquer escrita nessas colunas, porem a remocao do historico existente e tratada como uma decisao explicita do operador da infraestrutura, nunca como efeito colateral automatico de uma atualizacao de versao.
+Instalações provisionadas a partir de versões anteriores do PhishGuard podem conter registros históricos com conteúdo de mensagem armazenado em texto puro nas colunas legadas `mensagem_usuario` e `resposta_bot`. O sistema atual interrompe imediatamente qualquer escrita nessas colunas, porém a remoção do histórico existente é tratada como uma decisão explícita do operador da infraestrutura, nunca como efeito colateral automático de uma atualização de versão.
 
-O script `scripts/migrar_lgpd_zero_retencao.py` opera em tres modos progressivos:
+O script `scripts/migrar_lgpd_zero_retencao.py` opera em três modos progressivos:
 
-**Modo de diagnostico (padrao, nao destrutivo):**
+**Modo de diagnóstico (padrão, não destrutivo):**
 
 ```bash
 python scripts/migrar_lgpd_zero_retencao.py
 ```
 
-Reporta a quantidade de registros totais, as colunas legadas presentes no schema e a quantidade de valores de conteudo ainda residentes no banco de dados.
+Reporta a quantidade de registros totais, as colunas legadas presentes no schema e a quantidade de valores de conteúdo ainda residentes no banco de dados.
 
-**Modo de execucao (anonimizacao do historico):**
+**Modo de execução (anonimização do histórico):**
 
 ```bash
 python scripts/migrar_lgpd_zero_retencao.py --executar
 ```
 
-Sobrescreve com `NULL` o conteudo das colunas legadas, preservando integralmente os metadados historicos (canal, veredito, data e hora) para fins de continuidade estatistica dos paineis.
+Sobrescreve com `NULL` o conteúdo das colunas legadas, preservando integralmente os metadados históricos (canal, veredito, data e hora) para fins de continuidade estatística dos painéis.
 
-**Modo de execucao com remocao estrutural (irreversivel):**
+**Modo de execução com remoção estrutural (irreversível):**
 
 ```bash
 python scripts/migrar_lgpd_zero_retencao.py --executar --remover-colunas
 ```
 
-Apos a anonimizacao, executa a remocao definitiva (`DROP COLUMN`) das colunas legadas, tornando a garantia de retencao zero uma propriedade do proprio schema do banco de dados, impossivel de ser violada por um erro futuro de codigo. Esta operacao exige confirmacao explicita digitada pelo operador no momento da execucao.
+Após a anonimização, executa a remoção definitiva (`DROP COLUMN`) das colunas legadas, tornando a garantia de retenção zero uma propriedade do próprio schema do banco de dados, impossível de ser violada por um erro futuro de código. Esta operação exige confirmação explícita digitada pelo operador no momento da execução.
 
-### 7.3. Verificacao de Conformidade em Tempo de Execucao
+### 7.3. Verificação de Conformidade em Tempo de Execução
 
-Alem da suite de testes estatica, o sistema expoe uma rotina de autoauditoria acessivel via API, permitindo que um auditor externo, sem acesso direto a infraestrutura, confirme a ausencia de conteudo residual:
+Além da suíte de testes estática, o sistema expõe uma rotina de autoauditoria acessível via API, permitindo que um auditor externo, sem acesso direto à infraestrutura, confirme a ausência de conteúdo residual:
 
 ```bash
 curl -H "X-PhishGuard-Token: SEU_TOKEN_DE_GOVERNANCA" \
@@ -495,18 +495,18 @@ curl -H "X-PhishGuard-Token: SEU_TOKEN_DE_GOVERNANCA" \
 * Eduardo Costa Nascimento dos Anjos - RM 552519
 * Enzo Puerta Meschini - RM 550807
 
-Curso de Sistemas de Informacao - FIAP (2026)
+Curso de Sistemas de Informação - FIAP (2026)
 
 ---
 
-## Stack Tecnologica
+## Stack Tecnológica
 
 | Camada | Tecnologia |
 |---|---|
 | Linguagem principal | Python 3.11 |
-| Framework de API | FastAPI (assincrono) sobre Uvicorn |
+| Framework de API | FastAPI (assíncrono) sobre Uvicorn |
 | Machine Learning | Scikit-Learn (Random Forest), XGBoost, Pandas, NumPy |
-| Inteligencia Artificial Generativa | Google Gemini, via SDK `google-genai` |
+| Inteligência Artificial Generativa | Google Gemini, via SDK `google-genai` |
 | Banco de dados | PostgreSQL (Azure Database for PostgreSQL) |
-| Extensao de navegador | Chrome Manifest V3 (Service Worker e Content Script) |
-| Front-end dos paineis | HTML, CSS e JavaScript nativos, sem dependencia de build ou framework |
+| Extensão de navegador | Chrome Manifest V3 (Service Worker e Content Script) |
+| Front-end dos painéis | HTML, CSS e JavaScript nativos, sem dependência de build ou framework |
